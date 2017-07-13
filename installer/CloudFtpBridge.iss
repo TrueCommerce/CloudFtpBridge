@@ -2,8 +2,8 @@
 #define AppCopyright "Copyright (c) 2017, TrueCommerce PSG Engineering"
 #define AppName "Cloud FTP Bridge"
 #define AppServiceName "TcCloudFtpBridge"
-#define AppVersion "1.0.0"
-#define AppVersionStrict "1.0.0.0"
+#define AppVersion "1.0.1"
+#define AppVersionStrict "1.0.1.0"
 
 [Setup]
 AppName={#AppName}
@@ -28,6 +28,7 @@ OutputBaseFilename=CloudFtpBridge_{#AppVersion}
 ArchitecturesInstallIn64BitMode=x64
 DisableProgramGroupPage=auto
 DefaultGroupName={#AppCompany}
+LicenseFile=userdocs:GitHub\CloudFtpBridge\LICENSE
 
 [Files]
 Source: "..\src\Tc.Psg.CloudFtpBridge\bin\Release\FluentFTP.dll"; DestDir: "{app}"; Flags: ignoreversion
