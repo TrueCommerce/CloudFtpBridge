@@ -28,6 +28,7 @@ OutputBaseFilename=CloudFtpBridge_{#AppVersion}
 ArchitecturesInstallIn64BitMode=x64
 DisableProgramGroupPage=auto
 DefaultGroupName={#AppCompany}
+LicenseFile=userdocs:GitHub\CloudFtpBridge\LICENSE
 
 [Files]
 Source: "..\src\Tc.Psg.CloudFtpBridge\bin\Release\FluentFTP.dll"; DestDir: "{app}"; Flags: ignoreversion
