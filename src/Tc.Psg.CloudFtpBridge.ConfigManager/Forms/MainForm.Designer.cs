@@ -36,6 +36,9 @@
             this.DateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this._newCompany = new System.Windows.Forms.Button();
             this._done = new System.Windows.Forms.Button();
+            this._serviceController = new System.ServiceProcess.ServiceController();
+            this._deleteSelected = new System.Windows.Forms.Button();
+            this._startStop = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._gridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -113,11 +116,37 @@
             this._done.UseVisualStyleBackColor = true;
             this._done.Click += new System.EventHandler(this._OnDoneClick);
             // 
+            // _serviceController
+            // 
+            this._serviceController.ServiceName = "TcCloudFtpBridge";
+            // 
+            // _deleteSelected
+            // 
+            this._deleteSelected.Location = new System.Drawing.Point(158, 451);
+            this._deleteSelected.Name = "_deleteSelected";
+            this._deleteSelected.Size = new System.Drawing.Size(140, 30);
+            this._deleteSelected.TabIndex = 4;
+            this._deleteSelected.Text = "Delete Selected";
+            this._deleteSelected.UseVisualStyleBackColor = true;
+            this._deleteSelected.Click += new System.EventHandler(this._OnDeleteSelectedClick);
+            // 
+            // _startStop
+            // 
+            this._startStop.Location = new System.Drawing.Point(304, 451);
+            this._startStop.Name = "_startStop";
+            this._startStop.Size = new System.Drawing.Size(140, 30);
+            this._startStop.TabIndex = 5;
+            this._startStop.Text = "Start Service";
+            this._startStop.UseVisualStyleBackColor = true;
+            this._startStop.Click += new System.EventHandler(this._OnStartStopClick);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(727, 493);
+            this.Controls.Add(this._startStop);
+            this.Controls.Add(this._deleteSelected);
             this.Controls.Add(this._done);
             this.Controls.Add(this._newCompany);
             this.Controls.Add(this._gridView);
@@ -142,5 +171,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DateCreated;
         private System.Windows.Forms.DataGridViewTextBoxColumn DateModified;
         private System.Windows.Forms.Button _done;
+        private System.ServiceProcess.ServiceController _serviceController;
+        private System.Windows.Forms.Button _deleteSelected;
+        private System.Windows.Forms.Button _startStop;
     }
 }

@@ -56,7 +56,7 @@ namespace Tc.Psg.CloudFtpBridge.Configuration
 
         public void SaveTo(string path)
         {
-            using (FileStream stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write))
+            using (FileStream stream = new FileStream(path, FileMode.Create, FileAccess.Write))
             using (StreamWriter writer = new StreamWriter(stream))
             {
                 string json = JsonConvert.SerializeObject(this, Formatting.Indented);
