@@ -26,6 +26,15 @@ namespace Tc.Psg.CloudFtpBridge.Service
             _log = Log.ForContext<MainService>();
         }
 
+        protected override void OnShutdown()
+        {
+            _log.Debug("OnShutdown() BEGIN");
+
+            _cancellationTokenSource.Cancel();
+
+            _log.Debug("OnShutdown() END");
+        }
+
         protected override void OnStart(string[] args)
         {
             _log.Debug("OnStart() BEGIN");
