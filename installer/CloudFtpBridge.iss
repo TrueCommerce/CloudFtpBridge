@@ -65,7 +65,7 @@ begin
   CustomProgressPage.SetText('Registering Cloud FTP Bridge service...', '');
   CustomProgressPage.Show();
 
-  Exec(ExpandConstant('{sys}\sc.exe'), ExpandConstant('create {#AppServiceName} binPath="{app}\Tc.Psg.CloudFtpBridge.Service.exe" displayName="{#AppName}"'), '', SW_HIDE, ewWaitUntilTerminated, ExitCode);
+  Exec(ExpandConstant('{sys}\sc.exe'), ExpandConstant('create {#AppServiceName} binPath="{app}\Tc.Psg.CloudFtpBridge.Service.exe" displayName="{#AppName}" start="auto"'), '', SW_HIDE, ewWaitUntilTerminated, ExitCode);
   
   CustomProgressPage.Hide();
 end;
