@@ -73,21 +73,15 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="Controls\AboutControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Controls\AboutControl.cs" />
     <Compile Include="Controls\AboutControl.Designer.cs">
       <DependentUpon>AboutControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ServerGridControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Controls\ServerGridControl.cs" />
     <Compile Include="Controls\ServerGridControl.Designer.cs">
       <DependentUpon>ServerGridControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\WorkflowGridControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Controls\WorkflowGridControl.cs" />
     <Compile Include="Controls\WorkflowGridControl.Designer.cs">
       <DependentUpon>WorkflowGridControl.cs</DependentUpon>
     </Compile>
@@ -96,21 +90,15 @@
     <Compile Include="DependencyInjection\IControlFactory.cs" />
     <Compile Include="DependencyInjection\IFormFactory.cs" />
     <Compile Include="Extensions\IServiceCollectionExtensions.cs" />
-    <Compile Include="Forms\MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\MainForm.cs" />
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ServerDetailForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\ServerDetailForm.cs" />
     <Compile Include="Forms\ServerDetailForm.Designer.cs">
       <DependentUpon>ServerDetailForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\WorkflowDetailForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\WorkflowDetailForm.cs" />
     <Compile Include="Forms\WorkflowDetailForm.Designer.cs">
       <DependentUpon>WorkflowDetailForm.cs</DependentUpon>
     </Compile>
