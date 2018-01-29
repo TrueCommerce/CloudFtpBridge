@@ -1,37 +1,59 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
-using System.ServiceProcess;
 
-using Serilog;
-using Serilog.Events;
-
-using Tc.Psg.CloudFtpBridge.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Topshelf;
 
 namespace Tc.Psg.CloudFtpBridge.Service
 {
-    static class Program
+    class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        static void Main()
+        private const string _ServiceDescription = "Executes workflows to check for and transfer files between a local directory and an FTP folder.";
+        private const string _ServiceDisplayName = "Cloud FTP Bridge Polling Service";
+        private const string _ServiceName = "TcCloudFtpBridge";
+
+        static void Main(string[] args)
         {
-            CloudFtpBridgeConfig config = CloudFtpBridgeConfig.Load();
-            FileInfo assemblyFileInfo = new FileInfo(Assembly.GetEntryAssembly().Location);
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddJsonFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Constants.AppSettingsFileName))
+                .Build();
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Is(config.DebugEnabled ? LogEventLevel.Debug : LogEventLevel.Warning)
-                .WriteTo.RollingFile(Path.Combine(assemblyFileInfo.DirectoryName, @"Log\CloudFtpBridgeLog_{Date}.log"),
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level}] {SourceContext} {Message}{NewLine}{Exception}")
-                .CreateLogger();
+            IServiceCollection services = new ServiceCollection()
+                .AddLogging()
+                .AddCloudFtpBridgeCore(configuration.GetSection(Constants.CloudFtpBridgeConfigSectionName))
+                .AddCloudFtpBridgeService();
 
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+
+            loggerFactory.AddPsgLogging(configuration.GetSection(Constants.LoggingConfigSectionName));
+
+            TopshelfExitCode topshelfExitCode = HostFactory.Run(topshelf =>
             {
-                new MainService()
-            };
+                topshelf.EnableServiceRecovery(x =>
+                {
+                    x.RestartService(1).RestartService(2).RestartService(4);
+                });
 
-            ServiceBase.Run(ServicesToRun);
+                topshelf.Service<PollingService>(service =>
+                {
+                    service.ConstructUsing(() => serviceProvider.GetService<PollingService>());
+                    service.WhenStarted(x => x.Start());
+                    service.WhenStopped(x => x.Stop());
+                });
+
+                topshelf.RunAsLocalService();
+                topshelf.SetDescription(_ServiceDescription);
+                topshelf.SetDisplayName(_ServiceDisplayName);
+                topshelf.SetServiceName(_ServiceName);
+                topshelf.StartAutomatically();
+            });
+
+            int exitCode = (int)Convert.ChangeType(topshelfExitCode, topshelfExitCode.GetTypeCode());
+            Environment.ExitCode = exitCode;
         }
     }
 }
