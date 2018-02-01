@@ -27,8 +27,9 @@ namespace Tc.Psg.CloudFtpBridge.Mail
             fromAddress = fromAddress ?? options.FromAddress;
 
             SmtpClient smtpClient = new SmtpClient(options.SmtpHost);
-            smtpClient.Credentials = new NetworkCredential(options.SmtpUsername, options.SmtpPassword);
             smtpClient.UseDefaultCredentials = false;
+            smtpClient.Credentials = new NetworkCredential(options.SmtpUsername, options.SmtpPassword);
+            smtpClient.Port = options.SmtpPort;
 
             MailMessage message = new MailMessage();
             message.Body = body;

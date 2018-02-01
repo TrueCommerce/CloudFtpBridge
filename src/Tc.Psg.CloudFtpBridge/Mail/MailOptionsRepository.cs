@@ -1,12 +1,13 @@
 ﻿using LiteDB;
+using Microsoft.Extensions.Options;
 
 namespace Tc.Psg.CloudFtpBridge.Mail
 {
     public class MailOptionsRepository : IMailOptionsRepository
     {
-        public MailOptionsRepository()
+        public MailOptionsRepository(IOptions<CloudFtpBridgeOptions> optionsAccessor)
         {
-
+            Options = optionsAccessor.Value;
         }
 
         public CloudFtpBridgeOptions Options { get; private set; }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Tc.Psg.CloudFtpBridge.Mail
 {
@@ -6,9 +7,11 @@ namespace Tc.Psg.CloudFtpBridge.Mail
     {
         public MailOptions()
         {
+            Id = Guid.Empty;
             ToAddresses = new List<string>();
         }
 
+        public Guid Id { get; set; }
         public string FromAddress { get; set; }
         public string SmtpHost { get; set; }
         public string SmtpPassword { get; set; }

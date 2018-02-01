@@ -90,7 +90,7 @@
             this._testButton.Location = new System.Drawing.Point(752, 205);
             this._testButton.Name = "_testButton";
             this._testButton.Size = new System.Drawing.Size(75, 23);
-            this._testButton.TabIndex = 9;
+            this._testButton.TabIndex = 7;
             this._testButton.Text = "Test";
             this._testButton.UseVisualStyleBackColor = true;
             this._testButton.Click += new System.EventHandler(this._testButton_Click);
@@ -101,7 +101,7 @@
             this._saveButton.Location = new System.Drawing.Point(833, 205);
             this._saveButton.Name = "_saveButton";
             this._saveButton.Size = new System.Drawing.Size(120, 23);
-            this._saveButton.TabIndex = 8;
+            this._saveButton.TabIndex = 6;
             this._saveButton.Text = "Save";
             this._saveButton.UseVisualStyleBackColor = true;
             this._saveButton.Click += new System.EventHandler(this._saveButton_Click);
@@ -113,7 +113,7 @@
             this._toAddressesTextBox.Location = new System.Drawing.Point(9, 179);
             this._toAddressesTextBox.Name = "_toAddressesTextBox";
             this._toAddressesTextBox.Size = new System.Drawing.Size(944, 20);
-            this._toAddressesTextBox.TabIndex = 7;
+            this._toAddressesTextBox.TabIndex = 5;
             // 
             // _fromAddressTextBox
             // 
@@ -123,7 +123,7 @@
             this._fromAddressTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this._fromAddressTextBox.Name = "_fromAddressTextBox";
             this._fromAddressTextBox.Size = new System.Drawing.Size(944, 20);
-            this._fromAddressTextBox.TabIndex = 6;
+            this._fromAddressTextBox.TabIndex = 4;
             // 
             // _smtpPortTextBox
             // 
@@ -132,7 +132,7 @@
             this._smtpPortTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this._smtpPortTextBox.Name = "_smtpPortTextBox";
             this._smtpPortTextBox.Size = new System.Drawing.Size(65, 20);
-            this._smtpPortTextBox.TabIndex = 5;
+            this._smtpPortTextBox.TabIndex = 1;
             // 
             // _smtpHostTextBox
             // 
@@ -142,7 +142,7 @@
             this._smtpHostTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this._smtpHostTextBox.Name = "_smtpHostTextBox";
             this._smtpHostTextBox.Size = new System.Drawing.Size(873, 20);
-            this._smtpHostTextBox.TabIndex = 4;
+            this._smtpHostTextBox.TabIndex = 0;
             // 
             // _toAddressesLabel
             // 
@@ -205,7 +205,7 @@
             this._smtpUsernameTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this._smtpUsernameTextBox.Name = "_smtpUsernameTextBox";
             this._smtpUsernameTextBox.Size = new System.Drawing.Size(460, 20);
-            this._smtpUsernameTextBox.TabIndex = 11;
+            this._smtpUsernameTextBox.TabIndex = 2;
             // 
             // _smtpPasswordTextBox
             // 
@@ -215,7 +215,7 @@
             this._smtpPasswordTextBox.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this._smtpPasswordTextBox.Name = "_smtpPasswordTextBox";
             this._smtpPasswordTextBox.Size = new System.Drawing.Size(478, 20);
-            this._smtpPasswordTextBox.TabIndex = 12;
+            this._smtpPasswordTextBox.TabIndex = 3;
             // 
             // EmailConfigControl
             // 
