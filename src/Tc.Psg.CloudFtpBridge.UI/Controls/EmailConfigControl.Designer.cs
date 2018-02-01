@@ -216,6 +216,7 @@
             this._smtpPasswordTextBox.Name = "_smtpPasswordTextBox";
             this._smtpPasswordTextBox.Size = new System.Drawing.Size(478, 20);
             this._smtpPasswordTextBox.TabIndex = 3;
+            this._smtpPasswordTextBox.UseSystemPasswordChar = true;
             // 
             // EmailConfigControl
             // 
