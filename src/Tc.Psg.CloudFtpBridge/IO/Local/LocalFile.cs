@@ -36,7 +36,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Local
             return new FileStream(BaseFileInfo.FullName, FileMode.Create, FileAccess.Write);
         }
 
-        public async Task<IFile> MoveTo(IFolder destinationFolder)
+        public async Task<IFile> MoveTo(IFolder destinationFolder, string newName)
         {
             string destinationFileName = Path.Combine(destinationFolder.FullName, Name);
 

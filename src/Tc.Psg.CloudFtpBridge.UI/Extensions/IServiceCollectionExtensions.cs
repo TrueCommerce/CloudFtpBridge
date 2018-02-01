@@ -12,6 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IControlFactory, ControlFactory>()
                 .AddTransient<IFormFactory, FormFactory>()
                 .AddTransient<AboutControl>()
+                .AddTransient<EmailConfigControl>()
                 .AddTransient<ServerGridControl>()
                 .AddTransient<WorkflowGridControl>()
                 .AddTransient<MainForm>()

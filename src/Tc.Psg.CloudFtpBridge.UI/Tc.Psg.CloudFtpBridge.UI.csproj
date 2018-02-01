@@ -79,6 +79,12 @@
     <Compile Include="Controls\AboutControl.Designer.cs">
       <DependentUpon>AboutControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\EmailConfigControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EmailConfigControl.Designer.cs">
+      <DependentUpon>EmailConfigControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ServerGridControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -118,6 +124,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Controls\AboutControl.resx">
       <DependentUpon>AboutControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\EmailConfigControl.resx">
+      <DependentUpon>EmailConfigControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ServerGridControl.resx">
       <DependentUpon>ServerGridControl.cs</DependentUpon>

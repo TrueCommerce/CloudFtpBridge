@@ -17,6 +17,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
             _aboutTabPage.Controls.Add(controlFactory.CreateDockedControl<AboutControl>());
             _serversTabPage.Controls.Add(controlFactory.CreateDockedControl<ServerGridControl>());
             _workflowsTabPage.Controls.Add(controlFactory.CreateDockedControl<WorkflowGridControl>());
+            _alertsTabPage.Controls.Add(controlFactory.CreateDockedControl<EmailConfigControl>());
         }
     }
 }

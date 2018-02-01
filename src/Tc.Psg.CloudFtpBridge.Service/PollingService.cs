@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 using Tc.Psg.CloudFtpBridge.IO;
+using Tc.Psg.CloudFtpBridge.Mail;
 
 namespace Tc.Psg.CloudFtpBridge.Service
 {
@@ -16,22 +17,24 @@ namespace Tc.Psg.CloudFtpBridge.Service
         private bool _cancellationPending;
         private ILogger _log;
 
-        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IWorkflowRepository workflowRepository)
+        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IMailSender mailSender, IWorkflowRepository workflowRepository)
         {
             _log = NullLogger.Instance;
 
             FileManager = fileManager;
+            MailSender = mailSender;
             Options = optionsAccessor.Value;
             WorkflowRepository = workflowRepository;
         }
 
-        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IWorkflowRepository workflowRepository, ILogger<PollingService> logger)
-            : this(optionsAccessor, fileManager, workflowRepository)
+        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IMailSender mailSender, IWorkflowRepository workflowRepository, ILogger<PollingService> logger)
+            : this(optionsAccessor, fileManager, mailSender, workflowRepository)
         {
             _log = logger;
         }
 
         public IFileManager FileManager { get; private set; }
+        public IMailSender MailSender { get; private set; }
         public CloudFtpBridgeOptions Options { get; private set; }
         public IWorkflowRepository WorkflowRepository { get; private set; }
 
@@ -41,7 +44,17 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
             Task.Run(async () =>
             {
-                await _RunPollingLoop();
+                try
+                {
+                    await _RunPollingLoop();
+                }
+
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "An exception was thrown that caused the polling service to crash.");
+
+                    await MailSender.Send("Polling Service Crash", "An exception was thrown that caused the polling service to crash.");
+                }
             });
 
             _log.LogInformation("Polling service started successfully.");
@@ -69,7 +82,9 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
                     catch (Exception ex)
                     {
-                        _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will retry again during the next polling iteration.", workflow.Name);
+                        _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will try again in {PollingInterval} seconds.", workflow.Name, Options.PollingInterval);
+
+                        await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to execute workflow: {workflow.Name}. The polling service will try again in {Options.PollingInterval} seconds.");
                     }
                 }
 

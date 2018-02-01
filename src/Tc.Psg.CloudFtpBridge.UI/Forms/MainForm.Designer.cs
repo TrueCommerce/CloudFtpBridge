@@ -33,6 +33,7 @@
             this._workflowsTabPage = new System.Windows.Forms.TabPage();
             this._serversTabPage = new System.Windows.Forms.TabPage();
             this._aboutTabPage = new System.Windows.Forms.TabPage();
+            this._alertsTabPage = new System.Windows.Forms.TabPage();
             this._tabControl.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -41,6 +42,7 @@
             this._tabControl.Appearance = System.Windows.Forms.TabAppearance.FlatButtons;
             this._tabControl.Controls.Add(this._workflowsTabPage);
             this._tabControl.Controls.Add(this._serversTabPage);
+            this._tabControl.Controls.Add(this._alertsTabPage);
             this._tabControl.Controls.Add(this._aboutTabPage);
             this._tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this._tabControl.Location = new System.Drawing.Point(0, 0);
@@ -76,6 +78,15 @@
             this._aboutTabPage.Text = "About";
             this._aboutTabPage.UseVisualStyleBackColor = true;
             // 
+            // _alertsTabPage
+            // 
+            this._alertsTabPage.Location = new System.Drawing.Point(4, 25);
+            this._alertsTabPage.Name = "_alertsTabPage";
+            this._alertsTabPage.Size = new System.Drawing.Size(965, 482);
+            this._alertsTabPage.TabIndex = 3;
+            this._alertsTabPage.Text = "Email Alerts";
+            this._alertsTabPage.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -97,5 +108,6 @@
         private System.Windows.Forms.TabPage _workflowsTabPage;
         private System.Windows.Forms.TabPage _serversTabPage;
         private System.Windows.Forms.TabPage _aboutTabPage;
+        private System.Windows.Forms.TabPage _alertsTabPage;
     }
 }

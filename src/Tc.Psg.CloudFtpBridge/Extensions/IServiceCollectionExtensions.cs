@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 using Tc.Psg.CloudFtpBridge;
 using Tc.Psg.CloudFtpBridge.IO;
+using Tc.Psg.CloudFtpBridge.Mail;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -34,9 +35,11 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return services
                 .AddOptions()
+                .AddTransient<IMailOptionsRepository, MailOptionsRepository>()
                 .AddTransient<IWorkflowRepository, WorkflowRepository>()
                 .AddTransient<IServerRepository, ServerRepository>()
-                .AddTransient<IFileManager, FileManager>();
+                .AddTransient<IFileManager, FileManager>()
+                .AddTransient<IMailSender, MailSender>();
         }
     }
 }
