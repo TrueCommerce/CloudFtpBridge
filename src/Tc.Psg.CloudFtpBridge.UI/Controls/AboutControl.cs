@@ -1,5 +1,6 @@
 ﻿using System.Windows.Forms;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Tc.Psg.CloudFtpBridge.UI.Controls
 {
@@ -8,6 +9,8 @@ namespace Tc.Psg.CloudFtpBridge.UI.Controls
         public AboutControl()
         {
             InitializeComponent();
+
+            _appVersionLabel.Text = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         }
 
         private void _licenseLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

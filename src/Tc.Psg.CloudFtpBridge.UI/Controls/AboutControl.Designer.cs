@@ -74,7 +74,7 @@
             this._appVersionLabel.Name = "_appVersionLabel";
             this._appVersionLabel.Size = new System.Drawing.Size(952, 30);
             this._appVersionLabel.TabIndex = 8;
-            this._appVersionLabel.Text = "v1.0.0-beta.1";
+            this._appVersionLabel.Text = "[FILE_VERSION]";
             this._appVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // _appNameLabel
