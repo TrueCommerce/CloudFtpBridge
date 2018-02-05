@@ -43,12 +43,12 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
             if (_log.IsEnabled(LogLevel.Trace))
             {
-                _log.LogTrace("Using \"{FtpUsername}\" / \"{FtpPassword}\" to connect to \"{FtpHost}:{FtpPort}\".", server.Username, server.Password, server.Host, server.Port);
+                _log.LogTrace("Using {FtpUsername} / {FtpPassword} to connect to {FtpHost}:{FtpPort}.", server.Username, server.Password, server.Host, server.Port);
             }
 
             else
             {
-                _log.LogDebug("Using \"{FtpUsername}\" to connect to \"{FtpHost}:{FtpPort}\". Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
+                _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
             }
 
             IFolder localFolder = new LocalFolder(workflow.LocalPath);
@@ -65,6 +65,16 @@ namespace Tc.Psg.CloudFtpBridge.IO
             }
 
             _log.LogDebug("Completed workflow execution for: {WorkflowName}", workflow.Name);
+        }
+
+        private string _GetTimestampedName(string name)
+        {
+            return $"{DateTime.Now.ToString("yyyy-MM-dd_HHmmss")}_{name}";
+        }
+
+        private string _GetUnstampedName(string stampedName)
+        {
+            return stampedName.Substring(18);
         }
 
         private async Task _ProcessWorkflowFiles(Workflow workflow, IFolder sourceFolder, IFolder destinationFolder)
@@ -97,7 +107,7 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
             foreach (IFile sourceFile in sourceFiles)
             {
-                stagedFiles.Add(await sourceFile.MoveTo(processingFolder));
+                stagedFiles.Add(await sourceFile.MoveTo(processingFolder, _GetTimestampedName(sourceFile.Name)));
             }
 
             foreach (IFile stagedFile in stagedFiles)
@@ -106,7 +116,7 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
                 try
                 {
-                    IFile destinationFile = await destinationFolder.CreateFile(stagedFile.Name);
+                    IFile destinationFile = await destinationFolder.CreateFile(_GetUnstampedName(stagedFile.Name));
 
                     using (Stream sourceStream = await stagedFile.GetReadStream())
                     using (Stream destinationStream = await destinationFile.GetWriteStream())

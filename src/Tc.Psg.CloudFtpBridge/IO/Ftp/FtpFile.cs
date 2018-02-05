@@ -72,7 +72,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
         public async Task<IFile> MoveTo(IFolder destinationFolder, string newName = null)
         {
-            string destinationFullName = PathUtil.CombineFragments(destinationFolder.FullName, Name);
+            string destinationFullName = PathUtil.CombineFragments(destinationFolder.FullName, newName ?? Name);
 
             await BaseFtpClient.MoveFileAsync(FullName, destinationFullName, FtpExists.Overwrite);
 

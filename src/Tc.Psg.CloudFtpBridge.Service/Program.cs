@@ -23,6 +23,7 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
             IServiceCollection services = new ServiceCollection()
                 .AddLogging()
+                .EnableTraceLogging()
                 .AddCloudFtpBridgeCore(configuration.GetSection(Constants.CloudFtpBridgeConfigSectionName))
                 .AddCloudFtpBridgeService();
 

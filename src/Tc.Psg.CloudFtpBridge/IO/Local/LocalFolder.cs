@@ -12,7 +12,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Local
         }
 
         public DirectoryInfo BaseDirectoryInfo { get; private set; }
-        public string FullName { get; private set; }
+        public string FullName { get { return BaseDirectoryInfo.FullName; } }
 
         public async Task<IFile> CreateFile(string name)
         {
