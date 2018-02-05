@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using FluentFTP;
@@ -40,7 +41,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
         public async Task<IEnumerable<IFile>> GetFiles()
         {
-            FtpListItem[] ftpListItems = await BaseFtpClient.GetListingAsync(FullName);
+            FtpListItem[] ftpListItems = await _GetListingCore();
             ftpListItems = ftpListItems.Where(x => x.Type == FtpFileSystemObjectType.File).ToArray();
 
             List<IFile> files = new List<IFile>();
@@ -55,7 +56,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
         public async Task<IEnumerable<IFolder>> GetFolders()
         {
-            FtpListItem[] ftpListItems = await BaseFtpClient.GetListingAsync(FullName);
+            FtpListItem[] ftpListItems = await _GetListingCore();
             ftpListItems = ftpListItems.Where(x => x.Type == FtpFileSystemObjectType.Directory).ToArray();
 
             List<IFolder> folders = new List<IFolder>();
@@ -66,6 +67,33 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
             }
 
             return folders;
+        }
+
+        private async Task<FtpListItem[]> _GetListingCore(int attempt = 1)
+        {
+            FtpListItem[] items = new FtpListItem[0];
+
+            try
+            {
+                items = await BaseFtpClient.GetListingAsync(FullName);
+            }
+
+            catch
+            {
+                if (attempt <= 3)
+                {
+                    Thread.Sleep(1000);
+
+                    items = await _GetListingCore(attempt + 1);
+                }
+
+                else
+                {
+                    throw;
+                }
+            }
+
+            return items;
         }
     }
 }
