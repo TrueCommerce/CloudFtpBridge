@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Tc.Psg.CloudFtpBridge.Service")]
+[assembly: AssemblyTitle("Tc.Psg.CloudFtpBridge.UI")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
@@ -12,4 +12,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("f0cfa491-8e53-463d-8228-2616f2b1776a")]
+[assembly: Guid("7add057c-fc40-4c83-9327-697bfeb96a7f")]
