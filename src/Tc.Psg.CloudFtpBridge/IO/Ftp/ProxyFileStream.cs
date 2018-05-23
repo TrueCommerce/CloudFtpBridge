@@ -1,21 +1,24 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 {
     public class ProxyFileStream : FileStream
     {
-        public ProxyFileStream(string path, FileMode mode, FileAccess access)
+        private readonly Func<Task> _flushAction;
+
+        public ProxyFileStream(string path, FileMode mode, FileAccess access, Func<Task> flushAction)
             : base(path, mode, access)
-        { }
-
-        public event Action Closed;
-
-        public override void Close()
         {
-            base.Close();
+            _flushAction = flushAction ?? throw new ArgumentNullException(nameof(flushAction));
+        }
 
-            Closed?.Invoke();
+        public override async Task FlushAsync(CancellationToken cancellationToken)
+        {
+            await base.FlushAsync(cancellationToken);
+            await _flushAction.Invoke();
         }
     }
 }
