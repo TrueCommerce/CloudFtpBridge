@@ -122,6 +122,7 @@ namespace Tc.Psg.CloudFtpBridge.IO
                     using (Stream destinationStream = await destinationFile.GetWriteStream())
                     {
                         await sourceStream.CopyToAsync(destinationStream);
+                        await destinationStream.FlushAsync();
                     }
 
                     await stagedFile.MoveTo(archiveFolder);
