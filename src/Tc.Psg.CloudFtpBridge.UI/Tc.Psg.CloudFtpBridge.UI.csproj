@@ -172,10 +172,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Logging\Tc.Psg.Logging\Tc.Psg.Logging.csproj">
-      <Project>{71effa65-76af-4369-8abb-9d20f7f6d603}</Project>
-      <Name>Tc.Psg.Logging</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Tc.Psg.CloudFtpBridge\Tc.Psg.CloudFtpBridge.csproj">
       <Project>{c111f08d-6eaf-4ed2-8e6c-4c0b602ec566}</Project>
       <Name>Tc.Psg.CloudFtpBridge</Name>
