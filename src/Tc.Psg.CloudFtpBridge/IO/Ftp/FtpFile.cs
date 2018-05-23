@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 using FluentFTP;
+using Polly;
+
 using Tc.Psg.CloudFtpBridge.Utils;
 
 namespace Tc.Psg.CloudFtpBridge.IO.Ftp
@@ -47,7 +50,13 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
         {
             string tempFileName = Path.GetTempFileName();
 
-            await BaseFtpClient.DownloadFileAsync(tempFileName, FullName, true, FtpVerify.Retry | FtpVerify.Throw);
+            await Policy
+                .Handle<FtpException>()
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .ExecuteAsync(async () =>
+                {
+                    await BaseFtpClient.DownloadFileAsync(tempFileName, FullName, true, FtpVerify.Retry | FtpVerify.Throw);
+                });
 
             _tempFileNames.Add(tempFileName);
 
@@ -60,7 +69,13 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
             ProxyFileStream stream = new ProxyFileStream(tempFileName, FileMode.Create, FileAccess.Write, async () =>
             {
-                await BaseFtpClient.UploadFileAsync(tempFileName, FullName, FtpExists.Overwrite, true, FtpVerify.Retry | FtpVerify.Throw);
+                await Policy
+                    .Handle<FtpException>()
+                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .ExecuteAsync(async () =>
+                    {
+                        await BaseFtpClient.UploadFileAsync(tempFileName, FullName, FtpExists.Overwrite, true, FtpVerify.Retry | FtpVerify.Throw);
+                    });
             });
 
             _tempFileNames.Add(tempFileName);
