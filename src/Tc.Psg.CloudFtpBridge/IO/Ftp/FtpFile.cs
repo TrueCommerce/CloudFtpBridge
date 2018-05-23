@@ -67,14 +67,14 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
         {
             string tempFileName = Path.GetTempFileName();
 
-            ProxyFileStream stream = new ProxyFileStream(tempFileName, FileMode.Create, FileAccess.Write, async () =>
+            ProxyFileStream stream = new ProxyFileStream(tempFileName, FileMode.Create, async (data) =>
             {
                 await Policy
                     .Handle<FtpException>()
                     .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                     .ExecuteAsync(async () =>
                     {
-                        await BaseFtpClient.UploadFileAsync(tempFileName, FullName, FtpExists.Overwrite, true, FtpVerify.Retry | FtpVerify.Throw);
+                        await BaseFtpClient.UploadAsync(data, FullName, FtpExists.Overwrite, true);
                     });
             });
 
