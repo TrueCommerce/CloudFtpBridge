@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Polly;
 
 using Tc.Psg.CloudFtpBridge.IO;
 using Tc.Psg.CloudFtpBridge.Mail;
@@ -44,17 +45,30 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
             Task.Run(async () =>
             {
-                try
-                {
-                    await _RunPollingLoop();
-                }
+                await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(10))
+                    .ExecuteAsync(async () =>
+                    {
+                        try
+                        {
+                            await _RunPollingLoop();
+                        }
 
-                catch (Exception ex)
-                {
-                    _log.LogError(ex, "An exception was thrown that caused the polling service to crash.");
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, "An exception was thrown that caused the polling service to crash. It will be restarted in 10 seconds.");
 
-                    await MailSender.Send("Polling Service Crash", "An exception was thrown that caused the polling service to crash.");
-                }
+                            try
+                            {
+                                await MailSender.Send("Polling Service Crash", "An exception was thrown that caused the polling service to crash. It will be restarted in 10 seconds.");
+                            }
+
+                            catch { }
+
+                            throw;
+                        }
+                    });
             });
 
             _log.LogInformation("Polling service started successfully.");
@@ -75,17 +89,30 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
                 foreach (Workflow workflow in workflows)
                 {
-                    try
-                    {
-                        await FileManager.ExecuteWorkflow(workflow);
-                    }
+                    await Policy
+                        .Handle<Exception>()
+                        .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                        .ExecuteAsync(async () =>
+                        {
+                            try
+                            {
+                                await FileManager.ExecuteWorkflow(workflow);
+                            }
 
-                    catch (Exception ex)
-                    {
-                        _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will try again in {PollingInterval} seconds.", workflow.Name, Options.PollingInterval);
+                            catch (Exception ex)
+                            {
+                                _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will try again shortly.", workflow.Name);
 
-                        await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to execute workflow: {workflow.Name}. The polling service will try again in {Options.PollingInterval} seconds.");
-                    }
+                                try
+                                {
+                                    await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to execute workflow: {workflow.Name}. The polling service will try again shortly.");
+                                }
+
+                                catch { }
+
+                                throw;
+                            }
+                        });
                 }
 
                 Thread.Sleep(TimeSpan.FromSeconds(Options.PollingInterval));
