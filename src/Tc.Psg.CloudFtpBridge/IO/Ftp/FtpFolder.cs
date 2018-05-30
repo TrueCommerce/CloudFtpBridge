@@ -30,12 +30,18 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
         {
             string fullPath = PathUtil.CombineFragments(FullName, name);
 
-            bool exists = await BaseFtpClient.DirectoryExistsAsync(fullPath);
+            await Policy
+                .Handle<FtpCommandException>()
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .ExecuteAsync(async () =>
+                {
+                    bool exists = await BaseFtpClient.DirectoryExistsAsync(fullPath);
 
-            if (!exists)
-            {
-                await BaseFtpClient.CreateDirectoryAsync(fullPath);
-            }
+                    if (!exists)
+                    {
+                        await BaseFtpClient.CreateDirectoryAsync(fullPath);
+                    }
+                });
 
             return new FtpFolder(BaseFtpClient, fullPath);
         }
