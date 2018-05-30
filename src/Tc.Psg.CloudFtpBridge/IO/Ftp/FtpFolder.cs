@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 using FluentFTP;
+using Polly;
 
 using Tc.Psg.CloudFtpBridge.Utils;
 
@@ -29,12 +30,18 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
         {
             string fullPath = PathUtil.CombineFragments(FullName, name);
 
-            bool exists = await BaseFtpClient.DirectoryExistsAsync(fullPath);
+            await Policy
+                .Handle<FtpCommandException>()
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .ExecuteAsync(async () =>
+                {
+                    bool exists = await BaseFtpClient.DirectoryExistsAsync(fullPath);
 
-            if (!exists)
-            {
-                await BaseFtpClient.CreateDirectoryAsync(fullPath);
-            }
+                    if (!exists)
+                    {
+                        await BaseFtpClient.CreateDirectoryAsync(fullPath);
+                    }
+                });
 
             return new FtpFolder(BaseFtpClient, fullPath);
         }
@@ -69,29 +76,17 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
             return folders;
         }
 
-        private async Task<FtpListItem[]> _GetListingCore(int attempt = 1)
+        private async Task<FtpListItem[]> _GetListingCore()
         {
             FtpListItem[] items = new FtpListItem[0];
 
-            try
-            {
-                items = await BaseFtpClient.GetListingAsync(FullName);
-            }
-
-            catch
-            {
-                if (attempt <= 3)
+            await Policy
+                .Handle<FtpCommandException>()
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                .ExecuteAsync(async () =>
                 {
-                    Thread.Sleep(1000);
-
-                    items = await _GetListingCore(attempt + 1);
-                }
-
-                else
-                {
-                    throw;
-                }
-            }
+                    items = await BaseFtpClient.GetListingAsync(FullName);
+                });
 
             return items;
         }
