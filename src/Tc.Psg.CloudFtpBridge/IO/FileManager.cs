@@ -107,7 +107,19 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
             foreach (IFile sourceFile in sourceFiles)
             {
-                stagedFiles.Add(await sourceFile.MoveTo(processingFolder, _GetTimestampedName(sourceFile.Name)));
+                _log.LogDebug("Staging {SourceFileName}", sourceFile.FullName);
+
+                try
+                {
+                    IFile movedFile = await sourceFile.MoveTo(processingFolder, _GetTimestampedName(sourceFile.Name));
+
+                    stagedFiles.Add(movedFile);
+                }
+
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Failed to stage {SourceFileName}!", sourceFile.FullName);
+                }
             }
 
             foreach (IFile stagedFile in stagedFiles)
