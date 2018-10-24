@@ -2,8 +2,8 @@
 #define AppCopyright "Copyright (c) 2017, TrueCommerce PSG Engineering"
 #define AppName "Cloud FTP Bridge"
 #define AppServiceName "TcCloudFtpBridge"
-#define AppVersion "2.2.0"
-#define AppVersionStrict "2.2.0.0"
+#define AppVersion "2.3.0"
+#define AppVersionStrict "2.3.0.0"
 
 [Setup]
 AppName={#AppName}
@@ -31,9 +31,11 @@ DefaultGroupName={#AppCompany}
 LicenseFile=userdocs:GitHub\CloudFtpBridge\LICENSE
 
 [Files]
+Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.json"; DestDir: "{app}"; Flags: ignoreversion

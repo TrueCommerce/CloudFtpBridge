@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Tc.Psg.CloudFtpBridge.IO
 {
     public interface IFileManager
     {
         Task ExecuteWorkflow(Workflow workflow);
+        Task ProcessStagedWorkflowFiles(Workflow workflow);
+        Task StageWorkflowFiles(Workflow workflow);
     }
 }

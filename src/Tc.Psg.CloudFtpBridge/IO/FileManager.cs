@@ -36,79 +36,28 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
         public async Task ExecuteWorkflow(Workflow workflow)
         {
-            _log.LogDebug("Begin workflow execution for: {WorkflowName}", workflow.Name);
+            _log.LogDebug("Begin Executing Workflow", workflow.Name);
 
-            Server server = workflow.Server;
-            FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
-            if (_log.IsEnabled(LogLevel.Trace))
-            {
-                _log.LogTrace("Using {FtpUsername} / {FtpPassword} to connect to {FtpHost}:{FtpPort}.", server.Username, server.Password, server.Host, server.Port);
-            }
+            await StageWorkflowFiles(workflow);
+            await ProcessStagedWorkflowFiles(workflow);
 
-            else
-            {
-                _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
-            }
-
-            IFolder localFolder = new LocalFolder(workflow.LocalPath);
-            IFolder remoteFolder = new FtpFolder(ftpClient, PathUtil.CombineFragments(server.Path, workflow.RemotePath));
-
-            if (workflow.Direction == WorkflowDirection.Inbound)
-            {
-                await _ProcessWorkflowFiles(workflow, remoteFolder, localFolder);
-            }
-
-            else if (workflow.Direction == WorkflowDirection.Outbound)
-            {
-                await _ProcessWorkflowFiles(workflow, localFolder, remoteFolder);
-            }
-
-            _log.LogDebug("Completed workflow execution for: {WorkflowName}", workflow.Name);
+            _log.LogDebug("Finished Executing Workflow", workflow.Name);
         }
 
-        private string _GetTimestampedName(string name)
+        public async Task ProcessStagedWorkflowFiles(Workflow workflow)
         {
-            return $"{DateTime.Now.ToString("yyyy-MM-dd_HHmmss")}_{name}";
-        }
+            _log.LogDebug("Begin Processing Staged Workflow Files");
 
-        private string _GetUnstampedName(string stampedName)
-        {
-            return stampedName.Substring(18);
-        }
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
-        private async Task _ProcessWorkflowFiles(Workflow workflow, IFolder sourceFolder, IFolder destinationFolder)
-        {
-            _log.LogDebug("Source Folder: {SourceFolderName}", sourceFolder.FullName);
-            _log.LogDebug("Destination Folder: {DestinationFolderName}", destinationFolder.FullName);
+            IFolder stagingFolder = await _GetWorkflowFolder(workflow, FolderType.Staging);
+            IFolder destinationFolder = await _GetWorkflowFolder(workflow, FolderType.Destination);
+            IFolder archiveFolder = await _GetWorkflowFolder(workflow, FolderType.Archive);
+            IFolder failedFolder = await _GetWorkflowFolder(workflow, FolderType.Failed);
 
-            IFolder archiveFolder = await sourceFolder.CreateOrGetFolder(_ArchiveFolderName);
-            IFolder failedFolder = await sourceFolder.CreateOrGetFolder(_FailedFolderName);
-            IFolder processingFolder = await sourceFolder.CreateOrGetFolder(_ProcessingFolderName);
-            IEnumerable<IFile> sourceFiles = await sourceFolder.GetFiles();
-            IList<IFile> stagedFiles = new List<IFile>();
-
-            if (!string.IsNullOrWhiteSpace(workflow.FileFilter))
-            {
-                int preFilterSourceFileCount = sourceFiles.Count();
-
-                Regex regex = new Regex(workflow.FileFilter, RegexOptions.Compiled);
-                sourceFiles = sourceFiles.Where(x => regex.IsMatch(x.Name));
-
-                int postFilterSourceFileCount = sourceFiles.Count();
-
-                _log.LogDebug("Found {PreFilterSourceFileCount} files in source folder. Filtered to {PostFilterSourceFileCount} files using regex pattern: {FilterPattern}", preFilterSourceFileCount, postFilterSourceFileCount, workflow.FileFilter);
-            }
-
-            else
-            {
-                _log.LogDebug("Found {FileCount} files in source folder.", sourceFiles.Count());
-            }
-
-            foreach (IFile sourceFile in sourceFiles)
-            {
-                stagedFiles.Add(await sourceFile.MoveTo(processingFolder, _GetTimestampedName(sourceFile.Name)));
-            }
+            IEnumerable<IFile> stagedFiles = await stagingFolder.GetFiles();
 
             foreach (IFile stagedFile in stagedFiles)
             {
@@ -136,8 +85,119 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 }
             }
 
-            stagedFiles.Clear();
-            stagedFiles = null;
+            _log.LogDebug("Finished Processing Staged Workflow Files");
+        }
+
+        public async Task StageWorkflowFiles(Workflow workflow)
+        {
+            _log.LogDebug("Begin Staging Workflow Files");
+
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
+
+            IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source);
+            IFolder processingFolder = await _GetWorkflowFolder(workflow, FolderType.Staging);
+            IEnumerable<IFile> sourceFiles = await sourceFolder.GetFiles();
+
+            if (!string.IsNullOrWhiteSpace(workflow.FileFilter))
+            {
+                int preFilterSourceFileCount = sourceFiles.Count();
+
+                Regex regex = new Regex(workflow.FileFilter, RegexOptions.Compiled);
+                sourceFiles = sourceFiles.Where(x => regex.IsMatch(x.Name));
+
+                int postFilterSourceFileCount = sourceFiles.Count();
+
+                _log.LogDebug("Found {PreFilterSourceFileCount} files in source folder. Filtered to {PostFilterSourceFileCount} files using regex pattern: {FilterPattern}", preFilterSourceFileCount, postFilterSourceFileCount, workflow.FileFilter);
+            }
+
+            else
+            {
+                _log.LogDebug("Found {FileCount} files in source folder.", sourceFiles.Count());
+            }
+
+            foreach (IFile sourceFile in sourceFiles)
+            {
+                _log.LogDebug("Staging {SourceFileName}", sourceFile.FullName);
+
+                try
+                {
+                    await sourceFile.MoveTo(processingFolder, _GetTimestampedName(sourceFile.Name));
+                }
+
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Failed to stage {SourceFileName}!", sourceFile.FullName);
+                }
+            }
+
+            _log.LogDebug("Finished Staging Workflow Files");
+        }
+
+        private string _GetTimestampedName(string name)
+        {
+            return $"{DateTime.Now.ToString("yyyy-MM-dd_HHmmss")}_{name}";
+        }
+
+        private string _GetUnstampedName(string stampedName)
+        {
+            return stampedName.Substring(18);
+        }
+
+        private async Task<IFolder> _GetWorkflowFolder(Workflow workflow, FolderType type, bool suppressLogging = false)
+        {
+            IFolder folder;
+            string typeName = Enum.GetName(typeof(FolderType), type);
+
+            if (type == FolderType.Archive)
+            {
+                IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source, true);
+
+                folder = await sourceFolder.CreateOrGetFolder($"{_ArchiveFolderName}_{workflow.Id}");
+            }
+
+            else if (type == FolderType.Failed)
+            {
+                IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source, true);
+
+                folder = await sourceFolder.CreateOrGetFolder($"{_FailedFolderName}_{workflow.Id}");
+            }
+
+            else if (type == FolderType.Staging)
+            {
+                IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source, true);
+
+                folder = await sourceFolder.CreateOrGetFolder($"{_ProcessingFolderName}_{workflow.Id}");
+            }
+
+            else if ((type == FolderType.Source && workflow.Direction == WorkflowDirection.Inbound) || (type == FolderType.Destination && workflow.Direction == WorkflowDirection.Outbound))
+            {
+                Server server = workflow.Server;
+                FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
+
+                if (_log.IsEnabled(LogLevel.Trace))
+                {
+                    _log.LogTrace("Using {FtpUsername} / {FtpPassword} to connect to {FtpHost}:{FtpPort}.", server.Username, server.Password, server.Host, server.Port);
+                }
+
+                else
+                {
+                    _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
+                }
+
+                folder = new FtpFolder(ftpClient, PathUtil.CombineFragments(server.Path, workflow.RemotePath));
+            }
+
+            else
+            {
+                folder = new LocalFolder(workflow.LocalPath);
+            }
+
+            if (!suppressLogging)
+            {
+                _log.LogDebug(string.Concat(typeName, " Folder: {", typeName, "folderName}"), folder.FullName);
+            }
+
+            return folder;
         }
     }
 }
