@@ -83,9 +83,43 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
         private async Task _RunPollingLoop()
         {
+            _log.LogDebug("Begin Checking Staging Folders for Existing Files");
+
+            IEnumerable<Workflow> workflows = WorkflowRepository.GetAll();
+
+            foreach (Workflow workflow in workflows)
+            {
+                await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .ExecuteAsync(async () =>
+                    {
+                        try
+                        {
+                            await FileManager.ProcessStagedWorkflowFiles(workflow);
+                        }
+
+                        catch (Exception ex)
+                        {
+                            _log.LogError(ex, "Failed to process staged files for: {WorkflowName}. The polling service will try again shortly.", workflow.Name);
+
+                            try
+                            {
+                                await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to process staged files for: {workflow.Name}. The polling service will try again shortly.");
+                            }
+
+                            catch { }
+
+                            throw;
+                        }
+                    });
+            }
+
+            _log.LogDebug("Finished Checking Staging Folders for Existing Files");
+
             while (!_cancellationPending)
             {
-                IEnumerable<Workflow> workflows = WorkflowRepository.GetAll();
+                workflows = WorkflowRepository.GetAll();
 
                 foreach (Workflow workflow in workflows)
                 {
