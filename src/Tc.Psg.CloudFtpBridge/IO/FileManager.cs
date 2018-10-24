@@ -36,17 +36,21 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
         public async Task ExecuteWorkflow(Workflow workflow)
         {
-            _log.LogDebug("Begin workflow execution for: {WorkflowName}", workflow.Name);
+            _log.LogDebug("Begin Executing Workflow", workflow.Name);
+
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
             await StageWorkflowFiles(workflow);
             await ProcessStagedWorkflowFiles(workflow);
 
-            _log.LogDebug("Completed workflow execution for: {WorkflowName}", workflow.Name);
+            _log.LogDebug("Finished Executing Workflow", workflow.Name);
         }
 
         public async Task ProcessStagedWorkflowFiles(Workflow workflow)
         {
             _log.LogDebug("Begin Processing Staged Workflow Files");
+
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
             IFolder stagingFolder = await _GetWorkflowFolder(workflow, FolderType.Staging);
             IFolder destinationFolder = await _GetWorkflowFolder(workflow, FolderType.Destination);
@@ -87,6 +91,8 @@ namespace Tc.Psg.CloudFtpBridge.IO
         public async Task StageWorkflowFiles(Workflow workflow)
         {
             _log.LogDebug("Begin Staging Workflow Files");
+
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
             IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source);
             IFolder processingFolder = await _GetWorkflowFolder(workflow, FolderType.Staging);
