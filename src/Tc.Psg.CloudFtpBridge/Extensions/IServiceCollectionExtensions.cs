@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 using Tc.Psg.CloudFtpBridge;
 using Tc.Psg.CloudFtpBridge.IO;
+using Tc.Psg.CloudFtpBridge.Logging;
 using Tc.Psg.CloudFtpBridge.Mail;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -39,7 +40,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IWorkflowRepository, WorkflowRepository>()
                 .AddTransient<IServerRepository, ServerRepository>()
                 .AddTransient<IFileManager, FileManager>()
-                .AddTransient<IMailSender, MailSender>();
+                .AddTransient<IMailSender, MailSender>()
+                .AddSingleton<IEmailLogger, EmailLogger>()
+                .AddSingleton<IEmailLoggerProvider, EmailLoggerProvider>();
         }
     }
 }
