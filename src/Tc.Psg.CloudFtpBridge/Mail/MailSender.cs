@@ -34,7 +34,7 @@ namespace Tc.Psg.CloudFtpBridge.Mail
             MailMessage message = new MailMessage();
             message.Body = body;
             message.From = new MailAddress(options.FromAddress);
-            message.IsBodyHtml = false;
+            message.IsBodyHtml = true;
             message.Subject = subject;
             
             foreach (string toAddress in toAddresses)

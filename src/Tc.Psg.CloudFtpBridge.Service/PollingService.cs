@@ -9,79 +9,94 @@ using Microsoft.Extensions.Options;
 using Polly;
 
 using Tc.Psg.CloudFtpBridge.IO;
-using Tc.Psg.CloudFtpBridge.Mail;
+using Tc.Psg.CloudFtpBridge.Logging;
 
 namespace Tc.Psg.CloudFtpBridge.Service
 {
     public class PollingService
     {
-        private bool _cancellationPending;
-        private ILogger _log;
+        private readonly CancellationTokenSource _tokenSource;
 
-        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IMailSender mailSender, IWorkflowRepository workflowRepository)
+        private ILogger _log;
+        private Task _pollTask;
+
+        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IWorkflowRepository workflowRepository)
         {
+            _tokenSource = new CancellationTokenSource();
+
             _log = NullLogger.Instance;
 
             FileManager = fileManager;
-            MailSender = mailSender;
             Options = optionsAccessor.Value;
             WorkflowRepository = workflowRepository;
         }
 
-        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IMailSender mailSender, IWorkflowRepository workflowRepository, ILogger<PollingService> logger)
-            : this(optionsAccessor, fileManager, mailSender, workflowRepository)
+        public PollingService(IOptions<CloudFtpBridgeOptions> optionsAccessor, IFileManager fileManager, IWorkflowRepository workflowRepository, ILogger<PollingService> logger)
+            : this(optionsAccessor, fileManager, workflowRepository)
         {
             _log = logger;
         }
 
         public IFileManager FileManager { get; private set; }
-        public IMailSender MailSender { get; private set; }
         public CloudFtpBridgeOptions Options { get; private set; }
         public IWorkflowRepository WorkflowRepository { get; private set; }
 
-        public void Start()
+        public async Task Poll(CancellationToken token)
         {
-            _log.LogDebug("Starting polling service.");
-
-            Task.Run(async () =>
+            try
             {
-                await Policy
-                    .Handle<Exception>()
-                    .WaitAndRetryForeverAsync(retryAttempt => TimeSpan.FromSeconds(10))
-                    .ExecuteAsync(async () =>
+                try
+                {
+                    await ProcessStagedFiles();
+                }
+
+                catch (Exception ex)
+                {
+                    ex.MarkForEmailNotification();
+
+                    _log.LogError(ex, "Failed to successfully process all staged files. Normal polling will continue, but some staged files may remain unprocessed until the next time all events complete successfully.");
+                }
+
+                while (!token.IsCancellationRequested)
+                {
+                    try
                     {
-                        try
-                        {
-                            await _RunPollingLoop();
-                        }
+                        await ProcessWorkflows();
+                    }
 
-                        catch (Exception ex)
-                        {
-                            _log.LogError(ex, "An exception was thrown that caused the polling service to crash. It will be restarted in 10 seconds.");
+                    catch (Exception ex)
+                    {
+                        ex.MarkForEmailNotification();
 
-                            try
-                            {
-                                await MailSender.Send("Polling Service Crash", "An exception was thrown that caused the polling service to crash. It will be restarted in 10 seconds.");
-                            }
+                        _log.LogError(ex, "Failed to successfully process all workflows. The service will try again in {PollingInterval} seconds.", Options.PollingInterval);
+                    }
 
-                            catch { }
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(Options.PollingInterval), token);
+                    }
 
-                            throw;
-                        }
-                    });
-            });
+                    catch
+                    {
+                        // swallow exception due to task cancellation
+                    }
+                }
+            }
 
-            _log.LogInformation("Polling service started successfully.");
+            catch (Exception ex)
+            {
+                ex.MarkForEmailNotification();
+
+                _log.LogError(ex, "The polling service has crashed. It will need to be restarted manually.");
+            }
+
+            finally
+            {
+                _log.LogDebug("The polling service has been stopped.");
+            }
         }
 
-        public void Stop()
-        {
-            _log.LogDebug("Stopping polling service.");
-
-            _cancellationPending = true;
-        }
-
-        private async Task _RunPollingLoop()
+        public async Task ProcessStagedFiles()
         {
             _log.LogDebug("Begin Checking Staging Folders for Existing Files");
 
@@ -91,68 +106,57 @@ namespace Tc.Psg.CloudFtpBridge.Service
             {
                 await Policy
                     .Handle<Exception>()
-                    .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
+                    .WaitAndRetryAsync(5, x => _CalculateRetryInterval(x), (ex, interval) =>
+                    {
+                        _log.LogError(ex, "Failed to process staged files for: {WorkflowName}. The polling service will try again in {RetryInterval} seconds.", workflow.Name, interval.TotalSeconds);
+                    })
                     .ExecuteAsync(async () =>
                     {
-                        try
-                        {
-                            await FileManager.ProcessStagedWorkflowFiles(workflow);
-                        }
-
-                        catch (Exception ex)
-                        {
-                            _log.LogError(ex, "Failed to process staged files for: {WorkflowName}. The polling service will try again shortly.", workflow.Name);
-
-                            try
-                            {
-                                await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to process staged files for: {workflow.Name}. The polling service will try again shortly.");
-                            }
-
-                            catch { }
-
-                            throw;
-                        }
+                        await FileManager.ProcessStagedWorkflowFiles(workflow);
                     });
             }
 
             _log.LogDebug("Finished Checking Staging Folders for Existing Files");
+        }
 
-            while (!_cancellationPending)
+        public async Task ProcessWorkflows()
+        {
+            IEnumerable<Workflow> workflows = WorkflowRepository.GetAll();
+
+            foreach (Workflow workflow in workflows)
             {
-                workflows = WorkflowRepository.GetAll();
-
-                foreach (Workflow workflow in workflows)
-                {
-                    await Policy
-                        .Handle<Exception>()
-                        .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
-                        .ExecuteAsync(async () =>
-                        {
-                            try
-                            {
-                                await FileManager.ExecuteWorkflow(workflow);
-                            }
-
-                            catch (Exception ex)
-                            {
-                                _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will try again shortly.", workflow.Name);
-
-                                try
-                                {
-                                    await MailSender.Send("Failed Cloud FTP Bridge Workflow", $"Failed to execute workflow: {workflow.Name}. The polling service will try again shortly.");
-                                }
-
-                                catch { }
-
-                                throw;
-                            }
-                        });
-                }
-
-                Thread.Sleep(TimeSpan.FromSeconds(Options.PollingInterval));
+                await Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(5, x => _CalculateRetryInterval(x), (ex, interval) =>
+                    {
+                        _log.LogError(ex, "Failed to execute workflow: {WorkflowName}. The polling service will try again in {RetryInterval} seconds.", workflow.Name, interval.TotalSeconds);
+                    })
+                    .ExecuteAsync(async () =>
+                    {
+                        await FileManager.ExecuteWorkflow(workflow);
+                    });
             }
+        }
 
-            _log.LogInformation("Polling service stopped successfully.");
+        public void Start()
+        {
+            _log.LogDebug("Starting polling service.");
+
+            _pollTask = Poll(_tokenSource.Token);
+
+            _log.LogInformation("Polling service started successfully.");
+        }
+
+        public void Stop()
+        {
+            _log.LogDebug("Stopping polling service.");
+
+            _tokenSource.Cancel();
+        }
+
+        private TimeSpan _CalculateRetryInterval(int retryAttempt)
+        {
+            return TimeSpan.FromSeconds(((int)Math.Pow(3, retryAttempt) + Options.PollingInterval));
         }
     }
 }

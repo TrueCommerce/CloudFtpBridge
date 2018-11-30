@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Topshelf;
 
+using Tc.Psg.CloudFtpBridge.Logging;
+
 namespace Tc.Psg.CloudFtpBridge.Service
 {
     class Program
@@ -30,7 +32,9 @@ namespace Tc.Psg.CloudFtpBridge.Service
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
 
-            loggerFactory.AddPsgLogging(configuration.GetSection(Constants.LoggingConfigSectionName));
+            loggerFactory
+                .AddPsgLogging(configuration.GetSection(Constants.LoggingConfigSectionName))
+                .AddProvider(serviceProvider.GetService<IEmailLoggerProvider>());
 
             TopshelfExitCode topshelfExitCode = HostFactory.Run(topshelf =>
             {
