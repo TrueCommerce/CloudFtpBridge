@@ -48,14 +48,21 @@ namespace Tc.Psg.CloudFtpBridge.UI.Controls
 
         private void _grid_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            Guid workflowId = (Guid)_grid.Rows[e.RowIndex].Tag;
+            try
+            {
+                Guid workflowId = (Guid)_grid.Rows[e.RowIndex].Tag;
 
-            WorkflowDetailForm workflowDetailForm = FormFactory.CreateForm<WorkflowDetailForm>(ParentForm);
+                WorkflowDetailForm workflowDetailForm = FormFactory.CreateForm<WorkflowDetailForm>(ParentForm);
 
-            workflowDetailForm.WorkflowId = workflowId;
-            workflowDetailForm.ShowDialog();
+                workflowDetailForm.WorkflowId = workflowId;
+                workflowDetailForm.ShowDialog();
 
-            RefreshWorkflows();
+                RefreshWorkflows();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceInformation("Exception in _grid_CellMouseDoubleClick (WorkflowGridControl): " + ex.Message);
+            }
         }
     }
 }

@@ -40,10 +40,56 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
             _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
 
-            await StageWorkflowFiles(workflow);
-            await ProcessStagedWorkflowFiles(workflow);
+            //Skip staging and download directly
+            if (workflow.Direction == WorkflowDirection.InboundOptimized)
+            {
+                await ProcessInboundOptimizedWorkflowFiles(workflow);
+            }
+            else
+            {
+                await StageWorkflowFiles(workflow);
+                await ProcessStagedWorkflowFiles(workflow);
+            }
 
             _log.LogDebug("Finished Executing Workflow", workflow.Name);
+        }
+
+        public async Task ProcessInboundOptimizedWorkflowFiles(Workflow workflow)
+        {
+            _log.LogDebug("Begin Processing (InboundOptimized)");
+
+            _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
+
+            IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source);
+            IFolder destinationFolder = await _GetWorkflowFolder(workflow, FolderType.Destination);
+            IFolder archiveFolder = await _GetWorkflowFolder(workflow, FolderType.Archive);
+
+            IEnumerable<IFile> sourceFolderFiles = await sourceFolder.GetFiles();
+
+            foreach (IFile sourceFile in sourceFolderFiles)
+            {
+                _log.LogDebug("Processing {SourceFileName} (InboundOptimized)", sourceFile.FullName);
+
+                try
+                {
+                    IFile destinationFile = await destinationFolder.CreateFile(sourceFile.Name);
+
+                    using (Stream sourceStream = await sourceFile.GetReadStream())
+                    using (Stream destinationStream = await destinationFile.GetWriteStream())
+                    {
+                        await sourceStream.CopyToAsync(destinationStream);
+                        await destinationStream.FlushAsync();
+                    }
+                    await sourceFile.MoveTo(archiveFolder);
+                }
+
+                catch (Exception ex)
+                {
+                    _log.LogError(ex, "Failed to process {SourceFileName} (InboundOptimized)!", sourceFile.FullName);
+                }
+            }
+
+            _log.LogDebug("Finished Processing Workflow Files (InboundOptimized)");
         }
 
         public async Task ProcessStagedWorkflowFiles(Workflow workflow)
@@ -169,7 +215,7 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 folder = await sourceFolder.CreateOrGetFolder($"{_ProcessingFolderName}_{workflow.Id}");
             }
 
-            else if ((type == FolderType.Source && workflow.Direction == WorkflowDirection.Inbound) || (type == FolderType.Destination && workflow.Direction == WorkflowDirection.Outbound))
+            else if ((type == FolderType.Source && workflow.Direction == WorkflowDirection.Inbound) || (type == FolderType.Source && workflow.Direction == WorkflowDirection.InboundOptimized) || (type == FolderType.Destination && workflow.Direction == WorkflowDirection.Outbound))
             {
                 Server server = workflow.Server;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);

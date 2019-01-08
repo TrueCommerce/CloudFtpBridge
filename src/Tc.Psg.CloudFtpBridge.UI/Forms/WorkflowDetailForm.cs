@@ -15,7 +15,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
 
             InitializeComponent();
 
-            _directionComboBox.Items.AddRange(new string[] { "Inbound", "Outbound" });
+            _directionComboBox.Items.AddRange(new string[] { "Inbound", "InboundOptimized", "Outbound" });
             _serverComboBox.DisplayMember = "Name";
 
             LoadServers();

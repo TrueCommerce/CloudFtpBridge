@@ -199,7 +199,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 271);
+            this.ClientSize = new System.Drawing.Size(489, 267);
             this.Controls.Add(this._deleteLink);
             this.Controls.Add(this._browseLocalButton);
             this.Controls.Add(this._cancelButton);
