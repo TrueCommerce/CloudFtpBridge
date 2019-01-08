@@ -3,6 +3,7 @@
     public enum WorkflowDirection
     {
         Inbound = 0,
-        Outbound = 1
+        Outbound = 1,
+        InboundOptimized = 2
     }
 }
