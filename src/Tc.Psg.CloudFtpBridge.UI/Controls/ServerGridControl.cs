@@ -46,14 +46,19 @@ namespace Tc.Psg.CloudFtpBridge.UI.Controls
 
         private void _grid_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            Guid serverId = (Guid)_grid.Rows[e.RowIndex].Tag;
+            try
+            {
+                Guid serverId = (Guid)_grid.Rows[e.RowIndex].Tag;
 
-            ServerDetailForm serverDetailForm = FormFactory.CreateForm<ServerDetailForm>(ParentForm);
+                ServerDetailForm serverDetailForm = FormFactory.CreateForm<ServerDetailForm>(ParentForm);
 
-            serverDetailForm.ServerId = serverId;
-            serverDetailForm.ShowDialog();
+                serverDetailForm.ServerId = serverId;
+                serverDetailForm.ShowDialog();
 
-            RefreshServers();
+                RefreshServers();
+            } 
+            catch (Exception ex)
+            { System.Diagnostics.Trace.TraceInformation("_grid_CellMouseDoubleClick -  " + ex.Message); }
         }
     }
 }
