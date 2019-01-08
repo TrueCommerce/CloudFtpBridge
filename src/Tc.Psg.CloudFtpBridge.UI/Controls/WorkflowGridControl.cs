@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 
+using Microsoft.Extensions.Logging;
+
 using Tc.Psg.CloudFtpBridge.UI.DependencyInjection;
 using Tc.Psg.CloudFtpBridge.UI.Forms;
 
@@ -9,11 +11,19 @@ namespace Tc.Psg.CloudFtpBridge.UI.Controls
 {
     public partial class WorkflowGridControl : UserControl
     {
-        public WorkflowGridControl(IFormFactory formFactory, IServerRepository serverRepository, IWorkflowRepository workflowRepository)
+        private readonly ILogger _log;
+
+        public WorkflowGridControl(
+            IFormFactory formFactory,
+            IServerRepository serverRepository,
+            IWorkflowRepository workflowRepository,
+            ILogger<WorkflowGridControl> logger)
         {
             FormFactory = formFactory;
             ServerRepository = serverRepository;
             WorkflowRepository = workflowRepository;
+
+            _log = logger;
 
             InitializeComponent();
             RefreshWorkflows();
@@ -61,7 +71,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Controls
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceInformation("Exception in _grid_CellMouseDoubleClick (WorkflowGridControl): " + ex.Message);
+                _log.LogError(ex, $"Exception in _grid_CellMouseDoubleClick (WorkflowGridControl): {ex.Message}");
             }
         }
     }
