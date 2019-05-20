@@ -14,6 +14,8 @@ namespace Tc.Psg.CloudFtpBridge
         public string Path { get; set; }
         public int Port { get; set; }
         public string Username { get; set; }
+        public bool FtpsEnabled { get; set; } = false;
+        public string EncryptionMode { get; set; } = "None";
 
         public static Server Empty
         {

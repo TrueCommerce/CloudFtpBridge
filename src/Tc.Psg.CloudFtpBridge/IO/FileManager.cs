@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -230,6 +231,15 @@ namespace Tc.Psg.CloudFtpBridge.IO
                     _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
                 }
 
+                if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
+                {
+                    ftpClient.EncryptionMode = ftpEncryptionMode;
+                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
+                    ftpClient.SslProtocols = SslProtocols.Default;
+
+                    _log.LogDebug("FTPS is enabled. Encryption mode is set to {EncryptionMode}.", server.EncryptionMode);
+                }
+
                 folder = new FtpFolder(ftpClient, PathUtil.CombineFragments(server.Path, workflow.RemotePath));
             }
 
@@ -244,6 +254,11 @@ namespace Tc.Psg.CloudFtpBridge.IO
             }
 
             return folder;
+        }
+
+        private void OnValidateCertificate(FtpClient control, FtpSslValidationEventArgs e)
+        {
+            e.Accept = true;
         }
     }
 }
