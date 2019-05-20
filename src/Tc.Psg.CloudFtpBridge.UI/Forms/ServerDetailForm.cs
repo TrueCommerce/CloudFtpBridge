@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FluentFTP;
+using System;
+using System.Security.Authentication;
 using System.Windows.Forms;
 
 namespace Tc.Psg.CloudFtpBridge.UI.Forms
@@ -46,6 +48,15 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
 
         public bool SaveServer()
         {
+            string encryptMode = "";
+
+            if (implicitChk.Checked)
+                encryptMode = "Implicit";
+            else if (explicitChk.Checked)
+                encryptMode = "Explicit";
+            else
+                encryptMode = "None";
+
             Server server = new Server
             {
                 Id = (ServerId == Guid.Empty) ? Guid.NewGuid() : ServerId,
@@ -54,7 +65,9 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Password = _passwordTextBox.Text,
                 Path = _pathTextBox.Text,
                 Port = int.Parse(_portTextBox.Text),
-                Username = _usernameTextBox.Text
+                Username = _usernameTextBox.Text,
+                EncryptionMode =  encryptMode,
+                FtpsEnabled = ftpsChk.Checked
             };
 
             try
@@ -96,6 +109,76 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
             {
                 Close();
             }
+        }
+
+        private void _testConnectionBtn_Click(object sender, EventArgs e)
+        {
+            TestConnectionToServer();
+        }
+
+        public void TestConnectionToServer()
+        {
+            string encryptMode = "None";
+
+            if (implicitChk.Checked)
+                encryptMode = "Implicit";
+            else if (explicitChk.Checked)
+                encryptMode = "Explicit";
+
+            Server server = new Server
+            {
+                Id = (ServerId == Guid.Empty) ? Guid.NewGuid() : ServerId,
+                Host = _hostTextBox.Text,
+                Name = _serverNameTextBox.Text,
+                Password = _passwordTextBox.Text,
+                Path = _pathTextBox.Text,
+                Port = int.Parse(_portTextBox.Text),
+                Username = _usernameTextBox.Text,
+                EncryptionMode = encryptMode,
+                FtpsEnabled = ftpsChk.Checked
+            };
+
+            try
+            {
+                Server.Validate(server);
+                FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
+
+                if (server.FtpsEnabled)
+                {
+                    if (!string.IsNullOrEmpty(server.EncryptionMode))
+                    {
+                        if (server.EncryptionMode == "Explicit")
+                        {
+                            ftpClient.EncryptionMode = FtpEncryptionMode.Explicit;
+                        }
+                        else if (server.EncryptionMode == "Implicit")
+                        {
+                            ftpClient.EncryptionMode = FtpEncryptionMode.Implicit;
+                        }
+                        else
+                            ftpClient.EncryptionMode = FtpEncryptionMode.None;
+                    }
+
+                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
+                    ftpClient.SslProtocols = SslProtocols.Default;
+                }
+
+                ftpClient.Connect();
+                MessageBox.Show(this, "Connection test was successful!", "Connection Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show(this, ex.Message, "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception otherEx)
+            {
+                MessageBox.Show(this, otherEx.Message, "Connection Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void OnValidateCertificate(FtpClient control, FtpSslValidationEventArgs e)
+        {
+            e.Accept = true;
         }
     }
 }

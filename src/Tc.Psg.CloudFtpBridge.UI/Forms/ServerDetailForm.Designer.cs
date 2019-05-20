@@ -43,6 +43,14 @@
             this._saveButton = new System.Windows.Forms.Button();
             this._cancelButton = new System.Windows.Forms.Button();
             this._deleteLink = new System.Windows.Forms.LinkLabel();
+            this._testConnectionBtn = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.explicitChk = new System.Windows.Forms.CheckBox();
+            this.implicitChk = new System.Windows.Forms.CheckBox();
+            this.ftpsChk = new System.Windows.Forms.CheckBox();
+            this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // _serverNameLabel
@@ -150,7 +158,7 @@
             // 
             // _saveButton
             // 
-            this._saveButton.Location = new System.Drawing.Point(271, 191);
+            this._saveButton.Location = new System.Drawing.Point(271, 314);
             this._saveButton.Name = "_saveButton";
             this._saveButton.Size = new System.Drawing.Size(120, 23);
             this._saveButton.TabIndex = 7;
@@ -160,7 +168,7 @@
             // 
             // _cancelButton
             // 
-            this._cancelButton.Location = new System.Drawing.Point(397, 191);
+            this._cancelButton.Location = new System.Drawing.Point(397, 314);
             this._cancelButton.Name = "_cancelButton";
             this._cancelButton.Size = new System.Drawing.Size(75, 23);
             this._cancelButton.TabIndex = 8;
@@ -172,7 +180,7 @@
             // 
             this._deleteLink.AutoSize = true;
             this._deleteLink.LinkColor = System.Drawing.Color.Red;
-            this._deleteLink.Location = new System.Drawing.Point(12, 196);
+            this._deleteLink.Location = new System.Drawing.Point(12, 319);
             this._deleteLink.Name = "_deleteLink";
             this._deleteLink.Size = new System.Drawing.Size(72, 13);
             this._deleteLink.TabIndex = 11;
@@ -182,11 +190,75 @@
             this._deleteLink.VisitedLinkColor = System.Drawing.Color.Red;
             this._deleteLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._deleteLink_LinkClicked);
             // 
+            // _testConnectionBtn
+            // 
+            this._testConnectionBtn.Location = new System.Drawing.Point(163, 314);
+            this._testConnectionBtn.Name = "_testConnectionBtn";
+            this._testConnectionBtn.Size = new System.Drawing.Size(102, 23);
+            this._testConnectionBtn.TabIndex = 12;
+            this._testConnectionBtn.Text = "Test Connection";
+            this._testConnectionBtn.UseVisualStyleBackColor = true;
+            this._testConnectionBtn.Click += new System.EventHandler(this._testConnectionBtn_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.ftpsChk);
+            this.groupBox1.Controls.Add(this.groupBox3);
+            this.groupBox1.Location = new System.Drawing.Point(16, 192);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(457, 116);
+            this.groupBox1.TabIndex = 13;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "FTPS Options";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.implicitChk);
+            this.groupBox3.Controls.Add(this.explicitChk);
+            this.groupBox3.Location = new System.Drawing.Point(187, 12);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(264, 98);
+            this.groupBox3.TabIndex = 2;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Encryption Mode";
+            // 
+            // explicitChk
+            // 
+            this.explicitChk.AutoSize = true;
+            this.explicitChk.Location = new System.Drawing.Point(6, 19);
+            this.explicitChk.Name = "explicitChk";
+            this.explicitChk.Size = new System.Drawing.Size(59, 17);
+            this.explicitChk.TabIndex = 0;
+            this.explicitChk.Text = "Explicit";
+            this.explicitChk.UseVisualStyleBackColor = true;
+            // 
+            // implicitChk
+            // 
+            this.implicitChk.AutoSize = true;
+            this.implicitChk.Location = new System.Drawing.Point(6, 42);
+            this.implicitChk.Name = "implicitChk";
+            this.implicitChk.Size = new System.Drawing.Size(58, 17);
+            this.implicitChk.TabIndex = 1;
+            this.implicitChk.Text = "Implicit";
+            this.implicitChk.UseVisualStyleBackColor = true;
+            // 
+            // ftpsChk
+            // 
+            this.ftpsChk.AutoSize = true;
+            this.ftpsChk.Location = new System.Drawing.Point(6, 19);
+            this.ftpsChk.Name = "ftpsChk";
+            this.ftpsChk.Size = new System.Drawing.Size(75, 17);
+            this.ftpsChk.TabIndex = 3;
+            this.ftpsChk.Text = "Use FTPS";
+            this.ftpsChk.UseVisualStyleBackColor = true;
+            // 
             // ServerDetailForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(484, 226);
+            this.ClientSize = new System.Drawing.Size(486, 341);
+            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this._testConnectionBtn);
             this.Controls.Add(this._deleteLink);
             this.Controls.Add(this._cancelButton);
             this.Controls.Add(this._saveButton);
@@ -210,6 +282,10 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Edit Server";
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -232,5 +308,11 @@
         private System.Windows.Forms.Button _saveButton;
         private System.Windows.Forms.Button _cancelButton;
         private System.Windows.Forms.LinkLabel _deleteLink;
+        private System.Windows.Forms.Button _testConnectionBtn;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.CheckBox implicitChk;
+        private System.Windows.Forms.CheckBox explicitChk;
+        private System.Windows.Forms.CheckBox ftpsChk;
     }
 }

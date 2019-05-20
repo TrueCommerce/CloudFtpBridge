@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Authentication;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -220,6 +221,28 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 Server server = workflow.Server;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
 
+                if (server.FtpsEnabled)
+                {
+                    if (!string.IsNullOrEmpty(server.EncryptionMode))
+                    {
+                        if (server.EncryptionMode == "Explicit")
+                        {
+                            ftpClient.EncryptionMode = FtpEncryptionMode.Explicit;
+                            _log.LogTrace("Using Ftps Explicit");
+                        }
+                        else if (server.EncryptionMode == "Implicit")
+                        {
+                            ftpClient.EncryptionMode = FtpEncryptionMode.Implicit;
+                            _log.LogTrace("Using Ftps Implicit");
+                        }
+                        else
+                            ftpClient.EncryptionMode = FtpEncryptionMode.None;
+                    }
+
+                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
+                    ftpClient.SslProtocols = SslProtocols.Default;
+                }
+
                 if (_log.IsEnabled(LogLevel.Trace))
                 {
                     _log.LogTrace("Using {FtpUsername} / {FtpPassword} to connect to {FtpHost}:{FtpPort}.", server.Username, server.Password, server.Host, server.Port);
@@ -244,6 +267,11 @@ namespace Tc.Psg.CloudFtpBridge.IO
             }
 
             return folder;
+        }
+
+        private void OnValidateCertificate(FtpClient control, FtpSslValidationEventArgs e)
+        {
+            e.Accept = true;
         }
     }
 }
