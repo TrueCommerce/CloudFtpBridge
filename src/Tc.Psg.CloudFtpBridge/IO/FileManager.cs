@@ -221,13 +221,6 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 Server server = workflow.Server;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
 
-                if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
-                {
-                    ftpClient.EncryptionMode = ftpEncryptionMode;
-                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
-                    ftpClient.SslProtocols = SslProtocols.Default;
-                }
-
                 if (_log.IsEnabled(LogLevel.Trace))
                 {
                     _log.LogTrace("Using {FtpUsername} / {FtpPassword} to connect to {FtpHost}:{FtpPort}.", server.Username, server.Password, server.Host, server.Port);
@@ -236,6 +229,15 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 else
                 {
                     _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
+                }
+
+                if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
+                {
+                    ftpClient.EncryptionMode = ftpEncryptionMode;
+                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
+                    ftpClient.SslProtocols = SslProtocols.Default;
+
+                    _log.LogDebug("FTPS is enabled. Encryption mode is set to {EncryptionMode}.", server.EncryptionMode);
                 }
 
                 folder = new FtpFolder(ftpClient, PathUtil.CombineFragments(server.Path, workflow.RemotePath));
