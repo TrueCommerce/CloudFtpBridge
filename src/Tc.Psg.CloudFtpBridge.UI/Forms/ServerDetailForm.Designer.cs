@@ -47,8 +47,7 @@
             this._ftpsOptionsGroupBox = new System.Windows.Forms.GroupBox();
             this._useFtpsCheckbox = new System.Windows.Forms.CheckBox();
             this._encryptionModeGroupBox = new System.Windows.Forms.GroupBox();
-            this.implicitChk = new System.Windows.Forms.CheckBox();
-            this.explicitChk = new System.Windows.Forms.CheckBox();
+            this._encryptionModeComboBox = new System.Windows.Forms.ComboBox();
             this._ftpsOptionsGroupBox.SuspendLayout();
             this._encryptionModeGroupBox.SuspendLayout();
             this.SuspendLayout();
@@ -158,7 +157,7 @@
             // 
             // _saveButton
             // 
-            this._saveButton.Location = new System.Drawing.Point(271, 314);
+            this._saveButton.Location = new System.Drawing.Point(273, 272);
             this._saveButton.Name = "_saveButton";
             this._saveButton.Size = new System.Drawing.Size(120, 23);
             this._saveButton.TabIndex = 7;
@@ -168,7 +167,7 @@
             // 
             // _cancelButton
             // 
-            this._cancelButton.Location = new System.Drawing.Point(397, 314);
+            this._cancelButton.Location = new System.Drawing.Point(399, 272);
             this._cancelButton.Name = "_cancelButton";
             this._cancelButton.Size = new System.Drawing.Size(75, 23);
             this._cancelButton.TabIndex = 8;
@@ -180,7 +179,7 @@
             // 
             this._deleteLink.AutoSize = true;
             this._deleteLink.LinkColor = System.Drawing.Color.Red;
-            this._deleteLink.Location = new System.Drawing.Point(12, 319);
+            this._deleteLink.Location = new System.Drawing.Point(12, 277);
             this._deleteLink.Name = "_deleteLink";
             this._deleteLink.Size = new System.Drawing.Size(72, 13);
             this._deleteLink.TabIndex = 11;
@@ -192,7 +191,7 @@
             // 
             // _testConnectionBtn
             // 
-            this._testConnectionBtn.Location = new System.Drawing.Point(163, 314);
+            this._testConnectionBtn.Location = new System.Drawing.Point(165, 272);
             this._testConnectionBtn.Name = "_testConnectionBtn";
             this._testConnectionBtn.Size = new System.Drawing.Size(102, 23);
             this._testConnectionBtn.TabIndex = 12;
@@ -206,7 +205,7 @@
             this._ftpsOptionsGroupBox.Controls.Add(this._encryptionModeGroupBox);
             this._ftpsOptionsGroupBox.Location = new System.Drawing.Point(16, 192);
             this._ftpsOptionsGroupBox.Name = "_ftpsOptionsGroupBox";
-            this._ftpsOptionsGroupBox.Size = new System.Drawing.Size(457, 116);
+            this._ftpsOptionsGroupBox.Size = new System.Drawing.Size(457, 74);
             this._ftpsOptionsGroupBox.TabIndex = 13;
             this._ftpsOptionsGroupBox.TabStop = false;
             this._ftpsOptionsGroupBox.Text = "FTPS Options";
@@ -214,7 +213,7 @@
             // _useFtpsCheckbox
             // 
             this._useFtpsCheckbox.AutoSize = true;
-            this._useFtpsCheckbox.Location = new System.Drawing.Point(6, 19);
+            this._useFtpsCheckbox.Location = new System.Drawing.Point(6, 31);
             this._useFtpsCheckbox.Name = "_useFtpsCheckbox";
             this._useFtpsCheckbox.Size = new System.Drawing.Size(75, 17);
             this._useFtpsCheckbox.TabIndex = 3;
@@ -224,40 +223,32 @@
             // 
             // _encryptionModeGroupBox
             // 
-            this._encryptionModeGroupBox.Controls.Add(this.implicitChk);
-            this._encryptionModeGroupBox.Controls.Add(this.explicitChk);
+            this._encryptionModeGroupBox.Controls.Add(this._encryptionModeComboBox);
             this._encryptionModeGroupBox.Location = new System.Drawing.Point(187, 12);
             this._encryptionModeGroupBox.Name = "_encryptionModeGroupBox";
-            this._encryptionModeGroupBox.Size = new System.Drawing.Size(264, 98);
+            this._encryptionModeGroupBox.Size = new System.Drawing.Size(264, 51);
             this._encryptionModeGroupBox.TabIndex = 2;
             this._encryptionModeGroupBox.TabStop = false;
             this._encryptionModeGroupBox.Text = "Encryption Mode";
             // 
-            // implicitChk
+            // _encryptionModeComboBox
             // 
-            this.implicitChk.AutoSize = true;
-            this.implicitChk.Location = new System.Drawing.Point(6, 42);
-            this.implicitChk.Name = "implicitChk";
-            this.implicitChk.Size = new System.Drawing.Size(58, 17);
-            this.implicitChk.TabIndex = 1;
-            this.implicitChk.Text = "Implicit";
-            this.implicitChk.UseVisualStyleBackColor = true;
-            // 
-            // explicitChk
-            // 
-            this.explicitChk.AutoSize = true;
-            this.explicitChk.Location = new System.Drawing.Point(6, 19);
-            this.explicitChk.Name = "explicitChk";
-            this.explicitChk.Size = new System.Drawing.Size(59, 17);
-            this.explicitChk.TabIndex = 0;
-            this.explicitChk.Text = "Explicit";
-            this.explicitChk.UseVisualStyleBackColor = true;
+            this._encryptionModeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this._encryptionModeComboBox.FormattingEnabled = true;
+            this._encryptionModeComboBox.Items.AddRange(new object[] {
+            "Explicit",
+            "Implicit",
+            "None"});
+            this._encryptionModeComboBox.Location = new System.Drawing.Point(6, 19);
+            this._encryptionModeComboBox.Name = "_encryptionModeComboBox";
+            this._encryptionModeComboBox.Size = new System.Drawing.Size(252, 21);
+            this._encryptionModeComboBox.TabIndex = 0;
             // 
             // ServerDetailForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(486, 341);
+            this.ClientSize = new System.Drawing.Size(486, 301);
             this.Controls.Add(this._ftpsOptionsGroupBox);
             this.Controls.Add(this._testConnectionBtn);
             this.Controls.Add(this._deleteLink);
@@ -286,7 +277,6 @@
             this._ftpsOptionsGroupBox.ResumeLayout(false);
             this._ftpsOptionsGroupBox.PerformLayout();
             this._encryptionModeGroupBox.ResumeLayout(false);
-            this._encryptionModeGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -312,8 +302,7 @@
         private System.Windows.Forms.Button _testConnectionBtn;
         private System.Windows.Forms.GroupBox _ftpsOptionsGroupBox;
         private System.Windows.Forms.GroupBox _encryptionModeGroupBox;
-        private System.Windows.Forms.CheckBox implicitChk;
-        private System.Windows.Forms.CheckBox explicitChk;
         private System.Windows.Forms.CheckBox _useFtpsCheckbox;
+        private System.Windows.Forms.ComboBox _encryptionModeComboBox;
     }
 }

@@ -35,6 +35,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 _portTextBox.Text = server.Port.ToString();
                 _usernameTextBox.Text = server.Username;
                 _useFtpsCheckbox.Checked = server.FtpsEnabled;
+                _encryptionModeComboBox.SelectedItem = server.EncryptionMode;
             }
 
             _deleteLink.Visible = ServerRepository.CanDelete(ServerId);
@@ -50,15 +51,6 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
 
         public bool SaveServer()
         {
-            string encryptMode = "";
-
-            if (implicitChk.Checked)
-                encryptMode = "Implicit";
-            else if (explicitChk.Checked)
-                encryptMode = "Explicit";
-            else
-                encryptMode = "None";
-
             Server server = new Server
             {
                 Id = (ServerId == Guid.Empty) ? Guid.NewGuid() : ServerId,
@@ -68,7 +60,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Path = _pathTextBox.Text,
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
-                EncryptionMode =  encryptMode,
+                EncryptionMode =  _encryptionModeComboBox.SelectedItem?.ToString(),
                 FtpsEnabled = _useFtpsCheckbox.Checked
             };
 
@@ -120,13 +112,6 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
 
         public void TestConnectionToServer()
         {
-            string encryptMode = "None";
-
-            if (implicitChk.Checked)
-                encryptMode = "Implicit";
-            else if (explicitChk.Checked)
-                encryptMode = "Explicit";
-
             Server server = new Server
             {
                 Id = (ServerId == Guid.Empty) ? Guid.NewGuid() : ServerId,
@@ -136,7 +121,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Path = _pathTextBox.Text,
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
-                EncryptionMode = encryptMode,
+                EncryptionMode = _encryptionModeComboBox.SelectedItem?.ToString(),
                 FtpsEnabled = _useFtpsCheckbox.Checked
             };
 
