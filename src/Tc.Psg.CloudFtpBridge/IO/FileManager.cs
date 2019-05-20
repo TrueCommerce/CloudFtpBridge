@@ -221,24 +221,9 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 Server server = workflow.Server;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
 
-                if (server.FtpsEnabled)
+                if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
                 {
-                    if (!string.IsNullOrEmpty(server.EncryptionMode))
-                    {
-                        if (server.EncryptionMode == "Explicit")
-                        {
-                            ftpClient.EncryptionMode = FtpEncryptionMode.Explicit;
-                            _log.LogTrace("Using Ftps Explicit");
-                        }
-                        else if (server.EncryptionMode == "Implicit")
-                        {
-                            ftpClient.EncryptionMode = FtpEncryptionMode.Implicit;
-                            _log.LogTrace("Using Ftps Implicit");
-                        }
-                        else
-                            ftpClient.EncryptionMode = FtpEncryptionMode.None;
-                    }
-
+                    ftpClient.EncryptionMode = ftpEncryptionMode;
                     ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
                     ftpClient.SslProtocols = SslProtocols.Default;
                 }
