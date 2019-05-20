@@ -41,6 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IServerRepository, ServerRepository>()
                 .AddTransient<IFileManager, FileManager>()
                 .AddTransient<IMailSender, MailSender>()
+                .AddTransient<IServerConnectionTester, ServerConnectionTester>()
                 .AddSingleton<IEmailLogger, EmailLogger>()
                 .AddSingleton<IEmailLoggerProvider, EmailLoggerProvider>();
         }

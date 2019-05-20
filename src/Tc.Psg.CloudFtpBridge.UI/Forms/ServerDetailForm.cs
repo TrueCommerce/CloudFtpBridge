@@ -1,15 +1,17 @@
-﻿using FluentFTP;
-using System;
-using System.Security.Authentication;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Tc.Psg.CloudFtpBridge.UI.Forms
 {
     public partial class ServerDetailForm : Form
     {
-        public ServerDetailForm(IServerRepository serverRepository)
+        private readonly IServerConnectionTester _serverConnectionTester;
+
+        public ServerDetailForm(IServerRepository serverRepository, IServerConnectionTester serverConnectionTester)
         {
             ServerRepository = serverRepository;
+            _serverConnectionTester = serverConnectionTester;
 
             InitializeComponent();
         }
@@ -125,52 +127,76 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 FtpsEnabled = _useFtpsCheckbox.Checked
             };
 
-            try
+            _SetControlText(_testConnectionBtn, "Testing...");
+            _SetFormState(false);
+
+            Task.Run(async () =>
             {
-                Server.Validate(server);
-                FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
-
-                if (server.FtpsEnabled)
+                try
                 {
-                    if (!string.IsNullOrEmpty(server.EncryptionMode))
-                    {
-                        if (server.EncryptionMode == "Explicit")
-                        {
-                            ftpClient.EncryptionMode = FtpEncryptionMode.Explicit;
-                        }
-                        else if (server.EncryptionMode == "Implicit")
-                        {
-                            ftpClient.EncryptionMode = FtpEncryptionMode.Implicit;
-                        }
-                        else
-                            ftpClient.EncryptionMode = FtpEncryptionMode.None;
-                    }
+                    await _serverConnectionTester.TestConnection(server);
 
-                    ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
-                    ftpClient.SslProtocols = SslProtocols.Default;
+                    _ShowMessageBox("Connection test was successful!", "Connection Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
 
-                ftpClient.Connect();
-                MessageBox.Show(this, "Connection test was successful!", "Connection Test", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show(this, ex.Message, "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception otherEx)
-            {
-                MessageBox.Show(this, otherEx.Message, "Connection Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
+                catch (InvalidOperationException ex)
+                {
+                    _ShowMessageBox(ex.Message, "Missing Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
 
-        private void OnValidateCertificate(FtpClient control, FtpSslValidationEventArgs e)
-        {
-            e.Accept = true;
+                catch (Exception otherEx)
+                {
+                    _ShowMessageBox(otherEx.Message, "Connection Test Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                finally
+                {
+                    _SetControlText(_testConnectionBtn, "Test Connection");
+                    _SetFormState(true);
+                }
+            });
+            
         }
 
         private void _useFtpsCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             _encryptionModeGroupBox.Enabled = _useFtpsCheckbox.Checked;
+        }
+
+        private void _SetControlText(Control control, string text)
+        {
+            if (control.InvokeRequired)
+            {
+                control.BeginInvoke(new Action<Control, string>(_SetControlText), control, text);
+
+                return;
+            }
+
+            control.Text = text;
+        }
+
+        private void _SetFormState(bool enabled)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<bool>(_SetFormState), enabled);
+
+                return;
+            }
+
+            Enabled = enabled;
+        }
+
+        private void _ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<string, string, MessageBoxButtons, MessageBoxIcon>(_ShowMessageBox), text, caption, buttons, icon);
+
+                return;
+            }
+
+            MessageBox.Show(this, text, caption, buttons, icon);
         }
     }
 }
