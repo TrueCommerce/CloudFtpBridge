@@ -34,9 +34,11 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 _pathTextBox.Text = server.Path;
                 _portTextBox.Text = server.Port.ToString();
                 _usernameTextBox.Text = server.Username;
+                _useFtpsCheckbox.Checked = server.FtpsEnabled;
             }
 
             _deleteLink.Visible = ServerRepository.CanDelete(ServerId);
+            _encryptionModeGroupBox.Enabled = _useFtpsCheckbox.Checked;
         }
 
         protected override void OnShown(EventArgs e)
@@ -67,7 +69,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
                 EncryptionMode =  encryptMode,
-                FtpsEnabled = ftpsChk.Checked
+                FtpsEnabled = _useFtpsCheckbox.Checked
             };
 
             try
@@ -135,7 +137,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
                 EncryptionMode = encryptMode,
-                FtpsEnabled = ftpsChk.Checked
+                FtpsEnabled = _useFtpsCheckbox.Checked
             };
 
             try
@@ -179,6 +181,11 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
         private void OnValidateCertificate(FtpClient control, FtpSslValidationEventArgs e)
         {
             e.Accept = true;
+        }
+
+        private void _useFtpsCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            _encryptionModeGroupBox.Enabled = _useFtpsCheckbox.Checked;
         }
     }
 }
