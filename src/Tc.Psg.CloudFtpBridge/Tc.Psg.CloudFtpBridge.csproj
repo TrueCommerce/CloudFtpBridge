@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentFTP" Version="19.2.2" />
+    <PackageReference Include="FluentFTP" Version="27.0.3" />
     <PackageReference Include="FluentValidation" Version="8.0.100" />
     <PackageReference Include="LiteDB" Version="4.1.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.1" />

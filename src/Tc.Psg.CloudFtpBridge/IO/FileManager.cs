@@ -219,6 +219,7 @@ namespace Tc.Psg.CloudFtpBridge.IO
             else if ((type == FolderType.Source && workflow.Direction == WorkflowDirection.Inbound) || (type == FolderType.Source && workflow.Direction == WorkflowDirection.InboundOptimized) || (type == FolderType.Destination && workflow.Direction == WorkflowDirection.Outbound))
             {
                 Server server = workflow.Server;
+                FtpDataConnectionType tempType;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
 
                 if (_log.IsEnabled(LogLevel.Trace))
@@ -231,13 +232,21 @@ namespace Tc.Psg.CloudFtpBridge.IO
                     _log.LogDebug("Using {FtpUsername} to connect to {FtpHost}:{FtpPort}. Enable trace-level logging to see password.", server.Username, server.Host, server.Port);
                 }
 
+                if (server.DataConnectionType == "Default")
+                {
+                    server.DataConnectionType = "AutoPassive";
+                }
+                //Set DataConnectionType FTP and FTPS
+                Enum.TryParse(server.DataConnectionType, out tempType);
+                ftpClient.DataConnectionType = tempType; 
+
                 if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
                 {
                     ftpClient.EncryptionMode = ftpEncryptionMode;
                     ftpClient.ValidateCertificate += new FtpSslValidation(OnValidateCertificate);
                     ftpClient.SslProtocols = SslProtocols.Default;
-
-                    _log.LogDebug("FTPS is enabled. Encryption mode is set to {EncryptionMode}.", server.EncryptionMode);
+                    
+                    _log.LogDebug("FTPS is enabled. Encryption mode is set to {EncryptionMode}. DataConnectionType is {DataConnectionType}", server.EncryptionMode, server.DataConnectionType);
                 }
 
                 folder = new FtpFolder(ftpClient, PathUtil.CombineFragments(server.Path, workflow.RemotePath));

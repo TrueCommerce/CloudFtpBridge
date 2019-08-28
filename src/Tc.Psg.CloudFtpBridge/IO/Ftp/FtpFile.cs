@@ -55,7 +55,7 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)))
                 .ExecuteAsync(async () =>
                 {
-                    await BaseFtpClient.DownloadFileAsync(tempFileName, FullName, true, FtpVerify.Retry | FtpVerify.Throw);
+                    await BaseFtpClient.DownloadFileAsync(tempFileName, FullName, FtpLocalExists.Append, FtpVerify.Retry | FtpVerify.Throw);
                 });
 
             _tempFileNames.Add(tempFileName);
