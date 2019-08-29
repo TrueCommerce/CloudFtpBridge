@@ -89,6 +89,9 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
             await BaseFtpClient.MoveFileAsync(FullName, destinationFullName, FtpExists.Overwrite);
 
+            //Remove temp file when done moving file
+            Dispose();
+
             return new FtpFile(BaseFtpClient, destinationFolder, destinationFullName);
         }
     }
