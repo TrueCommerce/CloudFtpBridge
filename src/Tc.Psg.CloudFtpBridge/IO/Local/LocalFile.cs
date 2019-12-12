@@ -44,5 +44,10 @@ namespace Tc.Psg.CloudFtpBridge.IO.Local
 
             return new LocalFile(destinationFolder, destinationFileName);
         }
+
+        public async Task Delete()
+        {
+            File.Delete(FullName);
+        }
     }
 }

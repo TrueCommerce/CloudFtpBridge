@@ -94,5 +94,14 @@ namespace Tc.Psg.CloudFtpBridge.IO.Ftp
 
             return new FtpFile(BaseFtpClient, destinationFolder, destinationFullName);
         }
+
+        public async Task Delete()
+        {
+
+            await BaseFtpClient.DeleteFileAsync(FullName);
+
+            //Remove temp file when done moving file
+            Dispose();
+        }
     }
 }
