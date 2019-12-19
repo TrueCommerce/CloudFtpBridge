@@ -299,6 +299,9 @@ namespace Tc.Psg.CloudFtpBridge.IO
                 Server server = workflow.Server;
                 FtpDataConnectionType tempType;
                 FtpClient ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
+                ftpClient.ConnectTimeout = 900000;
+                ftpClient.DataConnectionConnectTimeout = 900000;
+                ftpClient.DataConnectionReadTimeout = 900000;
 
                 if (_log.IsEnabled(LogLevel.Trace))
                 {
