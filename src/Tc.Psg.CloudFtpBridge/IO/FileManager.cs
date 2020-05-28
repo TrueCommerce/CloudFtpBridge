@@ -117,10 +117,14 @@ namespace Tc.Psg.CloudFtpBridge.IO
             _log.LogDebug("Begin Processing (InboundOptimized)");
 
             _log.LogDebug("Workflow Name: {WorkflowName}", workflow.Name);
-
+            IFolder archiveFolder = null;
             IFolder sourceFolder = await _GetWorkflowFolder(workflow, FolderType.Source);
             IFolder destinationFolder = await _GetWorkflowFolder(workflow, FolderType.Destination);
-            IFolder archiveFolder = await _GetWorkflowFolder(workflow, FolderType.Archive);
+
+            if (archive) //don't create the archive if not being used
+            { 
+                archiveFolder = await _GetWorkflowFolder(workflow, FolderType.Archive);
+            }
 
             IEnumerable<IFile> sourceFolderFiles = await sourceFolder.GetFiles();
             #region Filter with Regex
