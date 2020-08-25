@@ -104,16 +104,25 @@ namespace Tc.Psg.CloudFtpBridge.Service
 
             foreach (Workflow workflow in workflows)
             {
-                await Policy
-                    .Handle<Exception>()
-                    .WaitAndRetryAsync(5, x => _CalculateRetryInterval(x), (ex, interval) =>
-                    {
-                        _log.LogError(ex, "Failed to process staged files for: {WorkflowName}. The polling service will try again in {RetryInterval} seconds.", workflow.Name, interval.TotalSeconds);
-                    })
-                    .ExecuteAsync(async () =>
-                    {
-                        await FileManager.ProcessStagedWorkflowFiles(workflow);
-                    });
+                if (workflow.Direction == WorkflowDirection.InboundOptimizedNoArchive ||
+                    workflow.Direction == WorkflowDirection.InboundOptimized)
+                {
+                    //Do nothing
+                    _log.LogDebug("Skipping staging for Optimized Inbound. {WorkflowName}", workflow.Name);
+                }
+                else
+                {
+                    await Policy
+                        .Handle<Exception>()
+                        .WaitAndRetryAsync(5, x => _CalculateRetryInterval(x),
+                            (ex, interval) =>
+                            {
+                                _log.LogError(ex,
+                                    "Failed to process staged files for: {WorkflowName}. The polling service will try again in {RetryInterval} seconds.",
+                                    workflow.Name, interval.TotalSeconds);
+                            })
+                        .ExecuteAsync(async () => { await FileManager.ProcessStagedWorkflowFiles(workflow); });
+                }
             }
 
             _log.LogDebug("Finished Checking Staging Folders for Existing Files");

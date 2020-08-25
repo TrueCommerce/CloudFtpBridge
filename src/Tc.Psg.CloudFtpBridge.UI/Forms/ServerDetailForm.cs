@@ -38,6 +38,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 _usernameTextBox.Text = server.Username;
                 _useFtpsCheckbox.Checked = server.FtpsEnabled;
                 _encryptionModeComboBox.SelectedItem = server.EncryptionMode;
+                _dataConnectionTypeCombo.SelectedItem = server.DataConnectionType;
             }
 
             _deleteLink.Visible = ServerRepository.CanDelete(ServerId);
@@ -63,7 +64,8 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
                 EncryptionMode =  _encryptionModeComboBox.SelectedItem?.ToString(),
-                FtpsEnabled = _useFtpsCheckbox.Checked
+                FtpsEnabled = _useFtpsCheckbox.Checked,
+                DataConnectionType = _dataConnectionTypeCombo.SelectedItem?.ToString()
             };
 
             try
@@ -124,7 +126,8 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 Port = int.Parse(_portTextBox.Text),
                 Username = _usernameTextBox.Text,
                 EncryptionMode = _encryptionModeComboBox.SelectedItem?.ToString(),
-                FtpsEnabled = _useFtpsCheckbox.Checked
+                FtpsEnabled = _useFtpsCheckbox.Checked,
+                DataConnectionType = _dataConnectionTypeCombo.SelectedItem?.ToString()
             };
 
             _SetControlText(_testConnectionBtn, "Testing...");
