@@ -14,6 +14,12 @@ namespace Tc.Psg.CloudFtpBridge
 
             var ftpClient = new FtpClient(server.Host, server.Port, server.Username, server.Password);
 
+            if (server.DataConnectionType == "Default")
+                server.DataConnectionType = "AutoPassive";
+
+            Enum.TryParse(server.DataConnectionType, out FtpDataConnectionType ftpDataConnectionType);
+            ftpClient.DataConnectionType = ftpDataConnectionType;
+
             if (server.FtpsEnabled && Enum.TryParse(server.EncryptionMode, out FtpEncryptionMode ftpEncryptionMode))
             {
                 ftpClient.EncryptionMode = ftpEncryptionMode;

@@ -14,5 +14,6 @@ namespace Tc.Psg.CloudFtpBridge.IO
         Task<Stream> GetReadStream();
         Task<Stream> GetWriteStream();
         Task<IFile> MoveTo(IFolder destinationFolder, string newFileName = null);
+        Task Delete();
     }
 }

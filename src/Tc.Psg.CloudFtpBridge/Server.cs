@@ -16,7 +16,7 @@ namespace Tc.Psg.CloudFtpBridge
         public string Username { get; set; }
         public bool FtpsEnabled { get; set; } = false;
         public string EncryptionMode { get; set; } = "None";
-
+        public string DataConnectionType { get; set; } = "Default";
         public static Server Empty
         {
             get
