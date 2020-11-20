@@ -103,9 +103,17 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
                 catch (Exception ex)
                 {
-                    await sourceFile.MoveTo(failedFolder);
+                    if (!workflow.AutoRetryFailed)
+                    {
+                        await sourceFile.MoveTo(failedFolder);
 
-                    _log.LogError(ex, "Failed to process {SourceFileName}!", sourceFile.FullName);
+                        _log.LogError(ex, "Failed to process {SourceFileName}!", sourceFile.FullName);
+                    }
+
+                    else
+                    {
+                        _log.LogError(ex, "Failed to process {SourceFileName}! File will be kept in the source folder for the next run.", sourceFile.FullName);
+                    }
                 }
             }
 
@@ -208,9 +216,17 @@ namespace Tc.Psg.CloudFtpBridge.IO
 
                 catch (Exception ex)
                 {
-                    await stagedFile.MoveTo(failedFolder);
+                    if (!workflow.AutoRetryFailed)
+                    {
+                        await stagedFile.MoveTo(failedFolder);
 
-                    _log.LogError(ex, "Failed to process {SourceFileName}!", stagedFile.FullName);
+                        _log.LogError(ex, "Failed to process {SourceFileName}!", stagedFile.FullName);
+                    }
+
+                    else
+                    {
+                        _log.LogError(ex, "Failed to process {SourceFileName}! File will be kept in the staging folder for the next run.", stagedFile.FullName);
+                    }
                 }
             }
 

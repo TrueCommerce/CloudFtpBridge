@@ -16,6 +16,7 @@ namespace Tc.Psg.CloudFtpBridge
         public string LocalPath { get; set; }
         public string Name { get; set; }
         public string RemotePath { get; set; }
+        public bool AutoRetryFailed { get; set; }
 
         [BsonIgnore]
         public Server Server { get; set; }

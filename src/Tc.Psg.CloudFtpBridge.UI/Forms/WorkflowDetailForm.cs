@@ -54,6 +54,7 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 _nameTextBox.Text = workflow.Name;
                 _remotePathTextBox.Text = workflow.RemotePath;
                 _serverComboBox.SelectedItem = _serverComboBox.Items.Cast<Server>().First(x => x.Id.Equals(workflow.Server.Id));
+                _autoRetryFailedCheckbox.Checked = workflow.AutoRetryFailed;
             }
         }
 
@@ -74,7 +75,8 @@ namespace Tc.Psg.CloudFtpBridge.UI.Forms
                 LocalPath = _localPathTextBox.Text,
                 Name = _nameTextBox.Text,
                 RemotePath = _remotePathTextBox.Text,
-                Server = (Server)_serverComboBox.SelectedItem
+                Server = (Server)_serverComboBox.SelectedItem,
+                AutoRetryFailed = _autoRetryFailedCheckbox.Checked
             };
 
             try

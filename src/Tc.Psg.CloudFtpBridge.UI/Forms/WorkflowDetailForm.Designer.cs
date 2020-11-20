@@ -44,6 +44,9 @@
             this._cancelButton = new System.Windows.Forms.Button();
             this._browseLocalButton = new System.Windows.Forms.Button();
             this._deleteLink = new System.Windows.Forms.LinkLabel();
+            this._optionsGroup = new System.Windows.Forms.GroupBox();
+            this._autoRetryFailedCheckbox = new System.Windows.Forms.CheckBox();
+            this._optionsGroup.SuspendLayout();
             this.SuspendLayout();
             // 
             // _nameLabel
@@ -154,7 +157,7 @@
             // 
             // _saveButton
             // 
-            this._saveButton.Location = new System.Drawing.Point(271, 236);
+            this._saveButton.Location = new System.Drawing.Point(271, 309);
             this._saveButton.Name = "_saveButton";
             this._saveButton.Size = new System.Drawing.Size(120, 23);
             this._saveButton.TabIndex = 12;
@@ -164,7 +167,7 @@
             // 
             // _cancelButton
             // 
-            this._cancelButton.Location = new System.Drawing.Point(397, 236);
+            this._cancelButton.Location = new System.Drawing.Point(397, 309);
             this._cancelButton.Name = "_cancelButton";
             this._cancelButton.Size = new System.Drawing.Size(75, 23);
             this._cancelButton.TabIndex = 13;
@@ -186,7 +189,7 @@
             // 
             this._deleteLink.AutoSize = true;
             this._deleteLink.LinkColor = System.Drawing.Color.Red;
-            this._deleteLink.Location = new System.Drawing.Point(12, 241);
+            this._deleteLink.Location = new System.Drawing.Point(12, 314);
             this._deleteLink.Name = "_deleteLink";
             this._deleteLink.Size = new System.Drawing.Size(86, 13);
             this._deleteLink.TabIndex = 17;
@@ -195,11 +198,32 @@
             this._deleteLink.VisitedLinkColor = System.Drawing.Color.Red;
             this._deleteLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._deleteLink_LinkClicked);
             // 
+            // _optionsGroup
+            // 
+            this._optionsGroup.Controls.Add(this._autoRetryFailedCheckbox);
+            this._optionsGroup.Location = new System.Drawing.Point(15, 237);
+            this._optionsGroup.Name = "_optionsGroup";
+            this._optionsGroup.Size = new System.Drawing.Size(457, 66);
+            this._optionsGroup.TabIndex = 18;
+            this._optionsGroup.TabStop = false;
+            this._optionsGroup.Text = "Options";
+            // 
+            // _autoRetryFailedCheckbox
+            // 
+            this._autoRetryFailedCheckbox.AutoSize = true;
+            this._autoRetryFailedCheckbox.Location = new System.Drawing.Point(6, 19);
+            this._autoRetryFailedCheckbox.Name = "_autoRetryFailedCheckbox";
+            this._autoRetryFailedCheckbox.Size = new System.Drawing.Size(154, 17);
+            this._autoRetryFailedCheckbox.TabIndex = 0;
+            this._autoRetryFailedCheckbox.Text = "Auto-Retry Failed Transfers";
+            this._autoRetryFailedCheckbox.UseVisualStyleBackColor = true;
+            // 
             // WorkflowDetailForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(489, 267);
+            this.ClientSize = new System.Drawing.Size(489, 344);
+            this.Controls.Add(this._optionsGroup);
             this.Controls.Add(this._deleteLink);
             this.Controls.Add(this._browseLocalButton);
             this.Controls.Add(this._cancelButton);
@@ -224,6 +248,8 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Edit Workflow";
+            this._optionsGroup.ResumeLayout(false);
+            this._optionsGroup.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -247,5 +273,7 @@
         private System.Windows.Forms.Button _cancelButton;
         private System.Windows.Forms.Button _browseLocalButton;
         private System.Windows.Forms.LinkLabel _deleteLink;
+        private System.Windows.Forms.GroupBox _optionsGroup;
+        private System.Windows.Forms.CheckBox _autoRetryFailedCheckbox;
     }
 }
