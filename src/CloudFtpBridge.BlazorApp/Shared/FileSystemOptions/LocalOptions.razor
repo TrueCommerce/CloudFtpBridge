@@ -1,0 +1,69 @@
+﻿@using CloudFtpBridge.Infrastructure.LocalFileSystem
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Path</label>
+            <input @bind="Path" class="form-control" type="text" />
+            <small class="form-text text-muted">The full path to the directory. Usually starts with a drive letter (C:) or a double backslash for UNC paths (\\).</small>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Search Pattern</label>
+            <input @bind="Pattern" class="form-control" type="text" />
+            <small class="form-text text-muted">A file search pattern. For better performance, it is recommended to use this before using the regex filter feature if possible.</small>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    public const string ConfigPrefix = "CloudFtpBridge:Infrastructure:LocalFileSystem:";
+
+    [Parameter]
+    public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
+
+    protected string Path
+    {
+        get => Get("Path");
+        set => Set("Path", value);
+    }
+
+    protected string Pattern
+    {
+        get => Get("Pattern");
+        set => Set("Pattern", value);
+    }
+
+    protected string Get(string propertyName)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        if (!Options.ContainsKey(key))
+        {
+            return string.Empty;
+        }
+
+        return Options[key];
+    }
+
+    protected void Set(string propertyName, object value)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        Options[key] = value?.ToString();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!Options.Any())
+        {
+            // set defaults for new workflows
+            new LocalFileSystemOptions().ToStringDictionary(ConfigPrefix, Options);
+        }
+    }
+}

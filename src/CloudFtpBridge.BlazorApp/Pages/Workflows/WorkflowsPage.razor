@@ -1,0 +1,35 @@
+﻿@page "/workflows"
+
+@inject IWorkflowRepository WorkflowRepository
+@inject NavigationManager NavigationManager
+
+<div class="container">
+
+    <div class="row mb-2">
+        <div class="col">
+            <div class="list-group">
+                @foreach (var workflow in Workflows)
+                {
+                    <a class="list-group-item list-group-item-action" href="@($"workflows/{workflow.Id}")">@workflow.Name</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-success" href="@($"workflows/{Guid.NewGuid()}")">New Workflow</a>
+        </div>
+    </div>
+
+</div>
+
+@code
+{
+    public IReadOnlyCollection<Workflow> Workflows { get; private set; } = Array.Empty<Workflow>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Workflows = await WorkflowRepository.List();
+    }
+} 

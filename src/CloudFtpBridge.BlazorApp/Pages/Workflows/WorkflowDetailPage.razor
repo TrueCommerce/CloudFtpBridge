@@ -1,0 +1,136 @@
+﻿@page "/workflows/{workflowId}"
+
+@inject IWorkflowRepository WorkflowRepository
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+    @if (!Workflow.Enabled)
+    {
+        <div class="alert alert-warning text-center mb-4" role="alert">
+            <span>This workflow is disabled. To begin processing files with this workflow, check <strong>Enabled</strong> at the bottom of this screen.</span>
+        </div>
+    }
+
+    <EditForm Model="new { }">
+        <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label class="font-weight-bold">Workflow Name</label>
+                    <InputText @bind-Value="Workflow.Name" class="form-control" />
+                    <small class="form-text text-muted">User-friendly display name used to refer to this workflow.</small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col border rounded mr-1 py-1">
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Source File System</label>
+                            <InputSelect @bind-Value="Workflow.SourceFileSystemType" class="form-control">
+                                <option value="@SupportedFileSystems.FluentFTP">FTP</option>
+                                <option value="@SupportedFileSystems.Local">Local File System</option>
+                            </InputSelect>
+                            <small class="form-text text-muted">The source location where files will be transferred FROM.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Source File Filter</label>
+                            <input @bind="Workflow.SourceFileFilter" class="form-control" type="text" />
+                            <small class="form-text text-muted">A regex pattern used to filter which source files will be transferred.</small>
+                        </div>
+                    </div>
+                </div>
+
+                @switch (Workflow.SourceFileSystemType)
+                {
+                    case SupportedFileSystems.FluentFTP:
+                        <FluentFTPOptions Options="Workflow.SourceFileSystemConfig" />
+                        break;
+                    case SupportedFileSystems.Local:
+                        <LocalOptions Options="Workflow.SourceFileSystemConfig" />
+                        break;
+                }
+
+            </div>
+            <div class="col border rounded ml-1 py-1">
+
+                <div class="form-group">
+                    <label class="font-weight-bold">Destination File System</label>
+                    <InputSelect @bind-Value="Workflow.DestinationFileSystemType" class="form-control">
+                        <option value="@SupportedFileSystems.FluentFTP">FTP</option>
+                        <option value="@SupportedFileSystems.Local">Local File System</option>
+                    </InputSelect>
+                    <small class="form-text text-muted">The destination location where files will be transferred TO.</small>
+                </div>
+
+                @switch (Workflow.DestinationFileSystemType)
+                {
+                    case SupportedFileSystems.FluentFTP:
+                        <FluentFTPOptions Options="Workflow.DestinationFileSystemConfig" />
+                        break;
+                    case SupportedFileSystems.Local:
+                        <LocalOptions Options="Workflow.DestinationFileSystemConfig" />
+                        break;
+                }
+
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col">
+                <button @onclick="OnClickSave" class="btn btn-success mr-2" style="min-width:100px;">Save</button>
+                <button @onclick="OnClickDelete" class="btn btn-outline-danger mr-2" style="min-width:100px;">Delete</button>
+            </div>
+            <div class="col d-flex justify-content-end">
+                <div class="custom-control custom-checkbox">
+                    <InputCheckbox @bind-Value="Workflow.Enabled" class="custom-control-input" id="Workflow_Enabled" />
+                    <label class="custom-control-label" for="Workflow_Enabled">Enabled</label>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code
+{
+    public Workflow Workflow { get; set; } = new Workflow();
+
+    [Parameter]
+    public string WorkflowId { get; set; } = string.Empty;
+
+    protected async Task OnClickDelete()
+    {
+        if (!await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this workflow?"))
+        {
+            return;
+        }
+
+        await WorkflowRepository.Delete(WorkflowId);
+
+        NavigationManager.NavigateTo("workflows");
+    }
+
+    protected async Task OnClickSave()
+    {
+        await WorkflowRepository.Save(Workflow);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Workflow = await WorkflowRepository.Get(WorkflowId);
+
+        if (Workflow == null)
+        {
+            Workflow = new Workflow
+            {
+                Id = WorkflowId
+            };
+        }
+    }
+}

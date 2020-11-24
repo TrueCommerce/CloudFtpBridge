@@ -1,0 +1,139 @@
+﻿@page "/audit-log"
+
+@inject IAuditLog AuditLog
+@inject NavigationManager NavigationManager
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <button @onclick="OnClickSearch" class="btn btn-primary">Search</button>
+                    </div>
+                    <input @bind="SearchQuery" class="form-control" type="text" />
+                    @if (!string.IsNullOrWhiteSpace(SearchQuery))
+                    {
+                        <div class="input-group-append">
+                            <button @onclick="OnClickClear" class="btn btn-outline-danger">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+                <small class="form-text text-muted">Search the audit log using part of a file name.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Workflow</th>
+                        <th>File</th>
+                        <th>Stage</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size:0.8rem;">
+                    @foreach (var entry in AuditLogEntries)
+                    {
+                        <tr>
+                            <td style="min-width:150px;">@entry.DateCreated.LocalDateTime.ToString("G")</td>
+                            <td>@entry.WorkflowName</td>
+                            <td>@entry.FileName</td>
+                            <td style="max-width:100px;">
+                                <span class="@($"badge {GetBadgeColorClass(entry.FileStage)} p-1 px-2")" style="width:200px;">@entry.FileStage.ToDisplayName()</span>
+                            </td>
+                            <td>@entry.Message</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <button @onclick="OnClickLoadMore" class="btn btn-link w-100">Load More</button>
+        </div>
+    </div>
+
+</div>
+
+@code
+{
+    public List<AuditLogEntry> AuditLogEntries { get; private set; } = new List<AuditLogEntry>();
+
+    public int PageNumber { get; set; } = 1;
+    public string SearchQuery { get; set; } = string.Empty;
+
+    public async Task LoadMore()
+    {
+        PageNumber += 1;
+
+        if (string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            AuditLogEntries.AddRange(await AuditLog.GetEntries(PageNumber));
+        }
+
+        else
+        {
+            AuditLogEntries.AddRange(await AuditLog.GetEntries(PageNumber, filter: e => e.FileName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    public async Task Refresh()
+    {
+        PageNumber = 0;
+
+        AuditLogEntries.Clear();
+
+        await LoadMore();
+    }
+
+    protected string GetBadgeColorClass(FileStage stage)
+    {
+        return stage switch
+        {
+            FileStage.DeleteSourceCompleted => "badge-info",
+            FileStage.DeleteSourceFailed => "badge-danger",
+            FileStage.DeleteSourceStarted => "badge-warning",
+            FileStage.ReadCompleted => "badge-info",
+            FileStage.ReadFailed => "badge-danger",
+            FileStage.ReadStarted => "badge-warning",
+            FileStage.TransferCompleted => "badge-success",
+            FileStage.TransferStarted => "badge-primary",
+            FileStage.WriteCompleted => "badge-info",
+            FileStage.WriteFailed => "badge-danger",
+            FileStage.WriteStarted => "badge-warning",
+            _ => ""
+        };
+    }
+
+    protected async Task OnClickClear()
+    {
+        SearchQuery = string.Empty;
+
+        await Refresh();
+    }
+
+    protected async Task OnClickLoadMore()
+    {
+        await LoadMore();
+    }
+
+    protected async Task OnClickSearch()
+    {
+        await Refresh();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Refresh();
+    }
+}
