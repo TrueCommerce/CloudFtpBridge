@@ -1,0 +1,119 @@
+﻿@page "/email-alert-settings" 
+
+@inject IMailSettingsProvider MailSettingsProvider
+@inject IMailSender MailSender
+@inject IJSRuntime JSRuntime
+
+<div class="container">
+
+    @if (!MailSettings.Enabled)
+    {
+        <div class="alert alert-warning text-center mb-4" role="alert">
+            <span>Mail alerts are currently disabled.</span>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col">
+            <p class="text-center">Provide your SMTP server information below to allow Cloud FTP Bridge to send email alerts if a failure occurs during a file transfer.</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-10">
+            <div class="form-group">
+                <label>SMTP Host</label>
+                <input @bind="MailSettings.Host" class="form-control" type="text" />
+            </div>
+        </div>
+        <div class="col-2">
+            <div class="form-group">
+                <label>SMTP Port</label>
+                <input @bind="MailSettings.Port" class="form-control" type="number" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label>SMTP Username</label>
+                <input @bind="MailSettings.Username" class="form-control" type="text" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label>SMTP Password</label>
+                <input @bind="MailSettings.Password" class="form-control" type="password" />
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <div class="form-group">
+                <label>From Address</label>
+                <input @bind="MailSettings.FromAddress" class="form-control" type="text" />
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label>To Addresses</label>
+                <input @bind="ToAddressList" class="form-control" type="text" />
+                <small class="form-text text-muted">Separate multiple addresses with a comma (,).</small>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <button @onclick="OnClickSave" class="btn btn-success mr-2" style="min-width:100px;">Save</button>
+            <button @onclick="() => { }" class="btn btn-outline-secondary" style="min-width:100px;">Test</button>
+        </div>
+        <div class="col d-flex justify-content-end">
+            <EditForm Model="new { }">
+                <div class="custom-control custom-checkbox">
+                    <InputCheckbox @bind-Value="MailSettings.Enabled" class="custom-control-input" id="MailSettings_Enabled" />
+                    <label class="custom-control-label" for="MailSettings_Enabled">Enabled</label>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code
+{
+    protected MailSettings MailSettings { get; set; } = new MailSettings();
+
+    protected string ToAddressList
+    {
+        get
+        {
+            return string.Join(", ", MailSettings.ToAddresses);
+        }
+
+        set
+        {
+            MailSettings.ToAddresses = value
+                .Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(a => a.Trim())
+                .ToList();
+        }
+    }
+
+    public async Task Refresh()
+    {
+        MailSettings = await MailSettingsProvider.Get();
+    }
+
+    protected async Task OnClickSave()
+    {
+        await MailSettingsProvider.Save(MailSettings);
+    }
+
+    protected async Task OnClickTest()
+    {
+        await MailSender.Send("Cloud FTP Bridge: Test Email", "<strong>This is a test email from the Cloud FTP Bridge application.</strong>");
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await Refresh();
+    }
+}

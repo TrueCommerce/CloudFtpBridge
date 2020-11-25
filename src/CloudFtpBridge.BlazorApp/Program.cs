@@ -1,19 +1,14 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-
-using CloudFtpBridge.Core.Utils;
 
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Serilog;
 using Serilog.Extensions.Logging;
+
+using CloudFtpBridge.Core.Utils;
 
 namespace CloudFtpBridge.BlazorApp
 {
@@ -51,7 +46,9 @@ namespace CloudFtpBridge.BlazorApp
                 {
                     services.AddCloudFtpBridge(app =>
                     {
+                        app.UseJsonMailSettingsProvider();
                         app.UseLiteDBStorage();
+                        app.UseSmtpMailSender();
 
                         app.UseFluentFTPFileSystem();
                         app.UseLocalFileSystem();

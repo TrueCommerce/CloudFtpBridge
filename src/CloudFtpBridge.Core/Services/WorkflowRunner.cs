@@ -16,17 +16,20 @@ namespace CloudFtpBridge.Core.Services
         private readonly FileSystemActivator _fileSystemActivator;
         private readonly IAuditLog _auditLog;
         private readonly IOptionsMonitor<CoreOptions> _coreOptions;
+        private readonly IMailSender _mailSender;
         private readonly ILogger _logger;
 
         public WorkflowRunner(
             FileSystemActivator fileSystemActivator,
             IAuditLog auditLog,
             IOptionsMonitor<CoreOptions> coreOptions,
+            IMailSender mailSender,
             ILogger<WorkflowRunner> logger)
         {
             _fileSystemActivator = fileSystemActivator;
             _auditLog = auditLog;
             _coreOptions = coreOptions;
+            _mailSender = mailSender;
             _logger = logger;
         }
 
@@ -79,6 +82,8 @@ namespace CloudFtpBridge.Core.Services
 
                     sourceStream?.Dispose();
 
+                    await _mailSender.Send("Cloud FTP Bridge: File Read Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
+
                     continue;
                 }
 
@@ -98,6 +103,8 @@ namespace CloudFtpBridge.Core.Services
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
 
                     sourceStream?.Dispose();
+
+                    await _mailSender.Send("Cloud FTP Bridge: File Write Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
 
                     continue;
                 }
@@ -119,8 +126,7 @@ namespace CloudFtpBridge.Core.Services
                     _logger.LogError(ex, "Failed to delete {FileName} at source. This may cause duplicates if the file is processed again on the next run.", sourceFile.Name);
 
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message);
-
-                    // TODO: send an alert to warn there may be duplicates of this file
+                    await _mailSender.Send("Cloud FTP Bridge: File Delete Failure", $"<p style=\"color:red;\"><strong>WARNING:</strong>&nbsp;This error may result in the referenced file being processed more than once. Please audit your transactions as soon as possible.</p><h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
                 }
 
                 await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferCompleted);

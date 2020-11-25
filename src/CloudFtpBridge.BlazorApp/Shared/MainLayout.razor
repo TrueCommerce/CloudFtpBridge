@@ -2,15 +2,18 @@
 
 <div class="d-flex flex-column h-100">
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand">Cloud FTP Bridge</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark flex-column">
+        <div>
+            <h3 class="text-light">Cloud FTP Bridge</h3>
+        </div>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav justify-content-end">
-                <NavLink class="nav-link" href="audit-log">Audit Log</NavLink>
-                <NavLink class="nav-link" href="workflows">Workflows</NavLink>
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <NavLink class="nav-link px-3" href="workflows">Workflows</NavLink>
+                <NavLink class="nav-link px-3" href="email-alert-settings">Email Alerts</NavLink>
+                <NavLink class="nav-link px-3" href="audit-log">Audit Log</NavLink>
             </div>
         </div>
     </nav>
@@ -20,16 +23,25 @@
     </main>
 
     <footer class="bg-light">
+        <div class="text-center text-muted mb-2" style="font-size:0.75rem;">
+            <span>
+                <a class="btn btn-sm btn-link" href="https://github.com/TrueCommerce/CloudFtpBridge/releases/v3.0.0" target="_blank">v3.0.0</a>
+            </span>
+            <span>&nbsp; | &nbsp;</span>
+            <span>
+                <a class="btn btn-sm btn-link" href="https://github.com/TrueCommerce/CloudFtpBridge/wiki" target="_blank">Documentation</a>
+            </span>
+            <span>&nbsp; | &nbsp;</span>
+            <span>
+                <a class="btn btn-sm btn-link" href="https://github.com/TrueCommerce/CloudFtpBridge" target="_blank">Source</a>
+            </span>
+            <span>&nbsp; | &nbsp;</span>
+            <span>
+                <a class="btn btn-sm btn-link" href="https://github.com/TrueCommerce/CloudFtpBridge/blob/master/LICENSE" target="_blank">License</a>
+            </span>
+        </div>
         <div class="text-center text-muted" style="font-size:0.75rem;">
-            <span>v2.0.0</span>
-            <span>&nbsp; | &nbsp;</span>
-            <span>
-                <a class="btn btn-sm btn-link" href="" target="_blank">Documentation</a>
-            </span>
-            <span>&nbsp; | &nbsp;</span>
-            <span>
-                <a class="btn btn-sm btn-link" href="" target="_blank">Source</a>
-            </span>
+            <span>Copyright @DateTime.Now.Year - TrueCommerce, Inc.</span>
         </div>
     </footer>
 

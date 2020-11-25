@@ -18,8 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="..\CloudFtpBridge.Core\CloudFtpBridge.Core.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Infrastructure.FluentFTP\CloudFtpBridge.Infrastructure.FluentFTP.csproj" />
+    <ProjectReference Include="..\CloudFtpBridge.Infrastructure.Json\CloudFtpBridge.Infrastructure.Json.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Infrastructure.LiteDB\CloudFtpBridge.Infrastructure.LiteDB.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Infrastructure.LocalFileSystem\CloudFtpBridge.Infrastructure.LocalFileSystem.csproj" />
+    <ProjectReference Include="..\CloudFtpBridge.Infrastructure.Smtp\CloudFtpBridge.Infrastructure.Smtp.csproj" />
   </ItemGroup>
 
 </Project>

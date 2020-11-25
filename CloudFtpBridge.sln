@@ -25,6 +25,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFtpBridge.Infrastructure.Smtp", "src\CloudFtpBridge.Infrastructure.Smtp\CloudFtpBridge.Infrastructure.Smtp.csproj", "{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFtpBridge.Infrastructure.Json", "src\CloudFtpBridge.Infrastructure.Json\CloudFtpBridge.Infrastructure.Json.csproj", "{A6D99988-DB0B-4DCC-9A81-08A802526FFC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{9BA84E2D-1E91-4F85-854B-90DF0BC5461E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9BA84E2D-1E91-4F85-854B-90DF0BC5461E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9BA84E2D-1E91-4F85-854B-90DF0BC5461E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6D99988-DB0B-4DCC-9A81-08A802526FFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6D99988-DB0B-4DCC-9A81-08A802526FFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6D99988-DB0B-4DCC-9A81-08A802526FFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6D99988-DB0B-4DCC-9A81-08A802526FFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +74,8 @@ Global
 		{703E6A19-7B7E-4832-8327-30644AD87099} = {C27977BE-7208-4B2A-8DC9-47EE43386957}
 		{D22FD528-FE43-4698-9AE0-ADB6771F1167} = {C27977BE-7208-4B2A-8DC9-47EE43386957}
 		{9BA84E2D-1E91-4F85-854B-90DF0BC5461E} = {CA2FA16E-EF5A-42C1-90F4-0A9351CE1A22}
+		{AB3C17C0-1FB9-4EB1-9B61-ED55646E4B4B} = {C27977BE-7208-4B2A-8DC9-47EE43386957}
+		{A6D99988-DB0B-4DCC-9A81-08A802526FFC} = {C27977BE-7208-4B2A-8DC9-47EE43386957}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B3E20D95-3A68-4E34-ADCB-83BD3A715038}
