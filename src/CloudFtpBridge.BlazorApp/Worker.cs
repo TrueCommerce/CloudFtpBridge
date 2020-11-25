@@ -44,10 +44,11 @@ namespace CloudFtpBridge.BlazorApp
         {
             _logger.LogInformation("Worker Service Started");
 
+            IReadOnlyCollection<Workflow> workflows = Array.Empty<Workflow>();
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 bool skipDelay = false;
-                IReadOnlyCollection<Workflow> workflows = Array.Empty<Workflow>();
 
                 try
                 {

@@ -9,6 +9,13 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CloudFtpBridgeAppBuilderExtensions
     {
+        public static CloudFtpBridgeAppBuilder UseLiteDBLegacyStorage(this CloudFtpBridgeAppBuilder builder)
+        {
+            builder.AddSingleton<ILegacyDataProvider, LiteDBLegacyDataProvider>();
+
+            return builder;
+        }
+
         public static CloudFtpBridgeAppBuilder UseLiteDBStorage(this CloudFtpBridgeAppBuilder builder, Action<LiteDBOptions> configure = null)
         {
             Directory.CreateDirectory(PathHelper.GetDefaultStoragePath());

@@ -10,7 +10,7 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppCopyright={#AppCopyright}
 AppId={{C571D33E-BB2C-4453-8544-35E93924D568}
-DefaultDirName={pf}\True Commerce\PSG Engineering\Cloud FTP Bridge\v3
+DefaultDirName={pf}\True Commerce\PSG Engineering\Cloud FTP Bridge
 DisableDirPage=yes
 AppPublisher={#AppCompany}
 AppPublisherURL=https://www.truecommerce.com
@@ -30,8 +30,11 @@ DisableProgramGroupPage=yes
 DefaultGroupName={#AppCompany}
 LicenseFile=..\LICENSE
 
+[InstallDelete]
+Type: filesandordirs; Name: "{pf}\True Commerce\PSG Engineering\Cloud FTP Bridge\*"
+
 [Files]
-Source: "..\src\CloudFtpBridge.BlazorApp\bin\Release\net5.0\publish\*.*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\CloudFtpBridge.BlazorApp\bin\Release\net5.0\publish\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs;
 
 [Run]
 Filename: "{sys}\sc.exe"; Parameters: "delete TcCloudFtpBridge"; Flags: waituntilterminated; StatusMsg: "Uninstalling existing service...";

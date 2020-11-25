@@ -7,6 +7,7 @@ namespace CloudFtpBridge.Core.Utils
     public static class PathHelper
     {
         private const string _DefaultStoragePathFragment = @"TrueCommerce\PSGEngineering\CloudFtpBridge\v3";
+        private const string _LegacyStoragePathFragment = @"TrueCommerce\PSGEngineering\CloudFtpBridge";
 
         /// <summary>
         /// Combines the provided path parts.
@@ -14,6 +15,8 @@ namespace CloudFtpBridge.Core.Utils
         /// </summary>
         public static string Combine(params string[] parts)
         {
+            parts = parts.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+
             return string.Join("/", parts
                 .Select(p => p.Replace('\\', '/').Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
                 .SelectMany(p => p));
@@ -26,6 +29,16 @@ namespace CloudFtpBridge.Core.Utils
         public static string GetDefaultStoragePath()
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), _DefaultStoragePathFragment);
+        }
+
+        /// <summary>
+        /// Gets the location used by Cloud FTP Bridge 2.x and earlier.
+        /// Used primarily for data migration.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLegacyStoragePath()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), _LegacyStoragePathFragment);
         }
     }
 }

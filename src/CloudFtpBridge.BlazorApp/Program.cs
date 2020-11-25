@@ -39,7 +39,7 @@ namespace CloudFtpBridge.BlazorApp
                         .Enrich.WithEnvironmentUserName()
                         .Enrich.WithMachineName()
                         .WriteTo.File(
-                            path: Path.Combine(PathHelper.GetDefaultStoragePath(), @"Logs\CloudFtpBridge"),
+                            path: Path.Combine(PathHelper.GetDefaultStoragePath(), @"Logs\CloudFtpBridge.txt"),
                             fileSizeLimitBytes: (250 * 1024 * 1024), // 250MB
                             rollingInterval: RollingInterval.Day,
                             rollOnFileSizeLimit: true);
@@ -51,6 +51,7 @@ namespace CloudFtpBridge.BlazorApp
                     services.AddCloudFtpBridge(app =>
                     {
                         app.UseJsonMailSettingsProvider();
+                        app.UseLiteDBLegacyStorage();
                         app.UseLiteDBStorage();
                         app.UseSmtpMailSender();
 

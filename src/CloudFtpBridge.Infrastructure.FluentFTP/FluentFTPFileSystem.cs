@@ -111,6 +111,7 @@ namespace CloudFtpBridge.Infrastructure.FluentFTP
             _ftpClient.DataConnectionConnectTimeout = _options.Timeout;
             _ftpClient.DataConnectionReadTimeout = _options.Timeout;
             _ftpClient.ReadTimeout = _options.Timeout;
+            _ftpClient.ValidateAnyCertificate = true;
 
             await _ftpClient.ConnectAsync();
         }
