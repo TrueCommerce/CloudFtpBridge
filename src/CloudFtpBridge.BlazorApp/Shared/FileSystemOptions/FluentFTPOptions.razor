@@ -1,0 +1,184 @@
+﻿@using CloudFtpBridge.Infrastructure.FluentFTP
+
+<div class="row">
+    <div class="col-10">
+        <div class="form-group">
+            <label>Host</label>
+            <input @onchange="@(e => Set("Host", e.Value))" class="form-control" type="text" value="@(Get("Host"))" />
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="form-group">
+            <label>Port</label>
+            <input @onchange="@(e => Set("Port", e.Value))" class="form-control" type="number" value="@(Get("Port"))" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Path</label>
+            <input @onchange="@(e => Set("Path", e.Value))" class="form-control" type="text" value="@(Get("Path"))" />
+            <small class="form-text text-muted">The full path to the directory. Usually starts with a forward slash (/).</small>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Username</label>
+            <input @onchange="@(e => Set("Username", e.Value))" class="form-control" type="text" value="@(Get("Username"))" />
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label>Password</label>
+            <input @onchange="@(e => Set("Password", e.Value))" class="form-control" type="password" value="@(Get("Password"))" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="custom-control custom-checkbox">
+            <input @onchange="@(e => AutoConnect = !AutoConnect)" checked="@(AutoConnect)" class="custom-control-input" id="@($"AutoConnect_{ComponentId}")" type="checkbox" />
+            <label class="custom-control-label" for="@($"AutoConnect_{ComponentId}")">Auto-Connect</label>
+            <small class="form-text text-muted">When enabled, FluentFTP will attempt to auto-detect the best settings to use when communicating with the server.</small>
+        </div>
+    </div>
+</div>
+
+@if (!AutoConnect)
+{
+    <div class="row mt-2">
+        <div class="col">
+            <div class="form-group">
+                <label>Data Connection Type</label>
+                <InputSelect class="form-control" @bind-Value="DataConnectionType">
+                    <option value="AutoPassive">Passive: Auto</option>
+                    <option value="PASV">Passive: PASV</option>
+                    <option value="PASVEX">Passve: PASVEX</option>
+                    <option value="EPSV">Passive: EPSV</option>
+                    <option value="AutoActive">Active: Auto</option>
+                    <option value="PORT">Active: PORT</option>
+                    <option value="EPRT">Active: EPRT</option>
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label>Encryption Mode</label>
+                <InputSelect class="form-control" @bind-Value="EncryptionMode">
+                    <option value="None">None</option>
+                    <option value="Auto">Auto</option>
+                    <option value="Implicit">Implicit</option>
+                    <option value="Explicit">Explicit</option>
+                </InputSelect>
+            </div>
+        </div>
+    
+        <div class="col">
+            <div class="form-group">
+                <label>SSL Protocol</label>
+                <InputSelect class="form-control" @bind-Value="SslProtocol">
+                    <option value="Default">Default</option>
+                    <option value="Ssl2">SSL 2</option>
+                    <option value="Ssl3">SSL 3</option>
+                    <option value="Tls">TLS 1.0</option>
+                    <option value="Tls11">TLS 1.1</option>
+                    <option value="Tls12">TLS 1.2</option>
+                </InputSelect>
+            </div>
+        </div>
+    
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label>Retry Attempts</label>
+                <input @onchange="@(e => Set("RetryAttempts", e.Value))" class="form-control" type="number" value="@(Get("RetryAttempts"))" />
+                <small class="form-text text-muted">Number of times FluentFTP should retry FTP commands if an error occurs.</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label>Timeout</label>
+                <input @onchange="@(e => Set("Timeout", e.Value))" class="form-control" type="number" value="@(Get("Timeout"))" />
+            </div>
+        </div>
+    </div>
+}
+
+@code
+{
+    public const string ConfigPrefix = "CloudFtpBridge:Infrastructure:FluentFTP:";
+
+    [Parameter]
+    public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
+
+    protected string ComponentId { get; } = Guid.NewGuid().ToString();
+
+    protected bool AutoConnect
+    {
+        get
+        {
+            var value = Get("AutoConnect");
+
+            return string.IsNullOrWhiteSpace(value) ? false : bool.Parse(value);
+        }
+
+        set => Set("AutoConnect", value);
+    }
+
+    protected string DataConnectionType
+    {
+        get => Get("DataConnectionType");
+        set => Set("DataConnectionType", value);
+    }
+
+    protected string EncryptionMode
+    {
+        get => Get("EncryptionMode");
+        set => Set("EncryptionMode", value);
+    }
+
+    protected string SslProtocol
+    {
+        get => Get("SslProtocol");
+        set => Set("SslProtocol", value);
+    }
+
+    protected string Get(string propertyName)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        if (!Options.ContainsKey(key))
+        {
+            return string.Empty;
+        }
+
+        return Options[key];
+    }
+
+    protected void Set(string propertyName, object value)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        Options[key] = value?.ToString();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!Options.Any())
+        {
+            // set defaults for new workflows
+            new FluentFTPFileSystemOptions().ToStringDictionary(ConfigPrefix, Options);
+        }
+    }
+}

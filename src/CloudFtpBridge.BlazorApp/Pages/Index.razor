@@ -1,0 +1,15 @@
+﻿@page "/"
+
+@inject NavigationManager NavigationManager
+
+<br />
+
+@code
+{
+    
+    protected override void OnAfterRender(bool firstRender)
+    {
+        NavigationManager.NavigateTo("workflows");
+    }
+}
+
