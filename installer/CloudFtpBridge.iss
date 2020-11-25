@@ -2,15 +2,15 @@
 #define AppCopyright "Copyright (c) 2017, TrueCommerce PSG Engineering"
 #define AppName "Cloud FTP Bridge"
 #define AppServiceName "TcCloudFtpBridge"
-#define AppVersion "2.7.0"
-#define AppVersionStrict "2.7.0.0"
+#define AppVersion "3.0.0"
+#define AppVersionStrict "3.0.0.0"
 
 [Setup]
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppCopyright={#AppCopyright}
 AppId={{C571D33E-BB2C-4453-8544-35E93924D568}
-DefaultDirName={pf}\True Commerce\PSG Engineering\Cloud FTP Bridge
+DefaultDirName={pf}\True Commerce\PSG Engineering\Cloud FTP Bridge\v3
 DisableDirPage=yes
 AppPublisher={#AppCompany}
 AppPublisherURL=https://www.truecommerce.com
@@ -31,23 +31,20 @@ DefaultGroupName={#AppCompany}
 LicenseFile=..\LICENSE
 
 [Files]
-Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.Service\bin\Release\*.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\Tc.Psg.CloudFtpBridge.UI\bin\Release\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\CloudFtpBridge.BlazorApp\bin\Release\net5.0\publish\*.*"; DestDir: "{app}"; Flags: ignoreversion
 
 [Run]
-Filename: "{app}\CloudFtpBridgeService.exe"; Parameters: "uninstall"; Flags: waituntilterminated; StatusMsg: "Uninstalling polling service...";
-Filename: "{app}\CloudFtpBridgeService.exe"; Parameters: "install"; Flags: waituntilterminated; StatusMsg: "Installing polling service...";
-Filename: "{app}\CloudFtpBridgeService.exe"; Parameters: "start"; Flags: waituntilterminated; StatusMsg: "Starting polling service...";
+Filename: "{sys}\sc.exe"; Parameters: "delete TcCloudFtpBridge"; Flags: waituntilterminated; StatusMsg: "Uninstalling existing service...";
+Filename: "{sys}\sc.exe"; Parameters: "create TcCloudFtpBridge start= auto binpath= ""{app}\CloudFtpBridge.BlazorApp.exe"" displayname= ""Cloud FTP Bridge"" "; Flags: waituntilterminated; StatusMsg: "Installing service...";
+Filename: "{sys}\sc.exe"; Parameters: "description TcCloudFtpBridge ""Provides file transfer automation intended to be used with TrueCommerce Transaction Manager's Cloud FTP service."" "; Flags: waituntilterminated; StatusMsg: "Setting service description...";
+Filename: "{sys}\net.exe"; Parameters: "start TcCloudFtpBridge"; Flags: waituntilterminated; StatusMsg: "Starting service...";
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{pf}\True Commerce\PSG Engineering\Cloud FTP Bridge\*"
 
 [UninstallRun]
-Filename: "{app}\CloudFtpBridgeService.exe"; Parameters: "stop"; Flags: waituntilterminated;
-Filename: "{app}\CloudFtpBridgeService.exe"; Parameters: "uninstall"; Flags: waituntilterminated;
+Filename: "{sys}\net.exe"; Parameters: "stop TcCloudFtpBridge"; Flags: waituntilterminated;
+Filename: "{sys}\sc.exe"; Parameters: "delete TcCloudFtpBridge"; Flags: waituntilterminated;
 
 [Icons]
-Name: "{group}\Cloud FTP Bridge"; Filename: "{app}\CloudFtpBridgeUI.exe"
+Name: "{group}\Cloud FTP Bridge"; Filename: "http://localhost:5000/"
