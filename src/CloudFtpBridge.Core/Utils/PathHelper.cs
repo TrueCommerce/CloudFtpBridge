@@ -11,11 +11,18 @@ namespace CloudFtpBridge.Core.Utils
 
         /// <summary>
         /// Combines the provided path parts.
-        /// The returned path will NOT have leading or trailing slashes and will always use the forwrd slash (/).
+        /// The returned path will NOT have leading or trailing slashes and will always use the forwrd slash (/) UNLESS it is a UNC path, in which case backslashes and two leading backslashes are used.
         /// </summary>
         public static string Combine(params string[] parts)
         {
             parts = parts.Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
+
+            if (parts.Length > 0 && parts[0].StartsWith("\\\\"))
+            {
+                return string.Concat("\\\\", string.Join("\\", parts
+                .Select(p => p.Replace('/', '\\').Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries))
+                .SelectMany(p => p)));
+            }
 
             return string.Join("/", parts
                 .Select(p => p.Replace('\\', '/').Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries))

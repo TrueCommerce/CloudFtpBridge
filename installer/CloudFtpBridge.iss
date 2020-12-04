@@ -2,8 +2,8 @@
 #define AppCopyright "Copyright (c) 2017, TrueCommerce PSG Engineering"
 #define AppName "Cloud FTP Bridge"
 #define AppServiceName "TcCloudFtpBridge"
-#define AppVersion "3.0.0"
-#define AppVersionStrict "3.0.0.0"
+#define AppVersion "3.0.1"
+#define AppVersionStrict "3.0.1.0"
 
 [Setup]
 AppName={#AppName}
