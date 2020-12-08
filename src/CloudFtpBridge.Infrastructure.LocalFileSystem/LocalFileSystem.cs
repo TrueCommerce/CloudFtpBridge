@@ -51,8 +51,8 @@ namespace CloudFtpBridge.Infrastructure.LocalFileSystem
 
         public Task Rename(string oldFileName, string newFileName, bool overwriteExisting)
         {
-            var oldFullFileName = $"/{PathHelper.Combine(_options.Path, oldFileName)}";
-            var newFullFileName = $"/{PathHelper.Combine(_options.Path, newFileName)}";
+            var oldFullFileName = PathHelper.Combine(_options.Path, oldFileName);
+            var newFullFileName = PathHelper.Combine(_options.Path, newFileName);
 
             if (!overwriteExisting && File.Exists(newFullFileName))
             {
