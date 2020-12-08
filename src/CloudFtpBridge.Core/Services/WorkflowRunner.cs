@@ -36,6 +36,7 @@ namespace CloudFtpBridge.Core.Services
         /// <summary>
         /// Runs the provided workflow by activating the configured file systems and transferring files from source to destination.
         /// Returns "true" if there were files added to the source file system after the initial file listing was taken.
+        /// Returns "false" if the source file system is empty or contains files that failed to transfer properly.
         /// This means if this method returns "true", it can be immediatelly called again to continue processing files from the source file system.
         /// </summary>
         public async Task<bool> Run(Workflow workflow)
@@ -44,6 +45,8 @@ namespace CloudFtpBridge.Core.Services
             var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
 
             var sourceFiles = await sourceFileSystem.List();
+
+            var hasErrors = false;
 
             _logger.LogDebug("Found {SourceFileCount} files.", sourceFiles.Count);
 
@@ -81,6 +84,8 @@ namespace CloudFtpBridge.Core.Services
 
                     catch (Exception ex)
                     {
+                        hasErrors = true;
+
                         await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameFailed, ex.Message);
 
                         continue;
@@ -100,6 +105,8 @@ namespace CloudFtpBridge.Core.Services
 
                 catch (Exception ex)
                 {
+                    hasErrors = true;
+
                     _logger.LogError(ex, "Failed to read {FileName}", sourceFile.Name);
 
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadFailed, ex.Message);
@@ -122,6 +129,8 @@ namespace CloudFtpBridge.Core.Services
 
                 catch (Exception ex)
                 {
+                    hasErrors = true;
+
                     _logger.LogError(ex, "Failed to write {FileName}", sourceFile.Name);
 
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
@@ -147,6 +156,8 @@ namespace CloudFtpBridge.Core.Services
 
                 catch (Exception ex)
                 {
+                    hasErrors = true;
+
                     _logger.LogError(ex, "Failed to delete {FileName} at source. This may cause duplicates if the file is processed again on the next run.", sourceFile.Name);
 
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message);
@@ -158,7 +169,7 @@ namespace CloudFtpBridge.Core.Services
 
             await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
 
-            return await sourceFileSystem.HasFiles();
+            return !hasErrors && await sourceFileSystem.HasFiles();
         }
     }
 }
