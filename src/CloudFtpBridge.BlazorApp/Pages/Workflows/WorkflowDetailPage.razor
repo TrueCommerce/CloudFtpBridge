@@ -48,6 +48,16 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col">
+                        <div class="custom-control custom-checkbox">
+                            <InputCheckbox @bind-Value="Workflow.EnforceUniqueFileNames" class="custom-control-input" id="Workflow_EnforceUniqueFileNames" />
+                            <label class="custom-control-label" for="Workflow_EnforceUniqueFileNames">Enforce Unique File Names</label>
+                            <small class="form-text text-muted">Source files will be renamed with a unique file name before being transferred.</small>
+                        </div>
+                    </div>
+                </div>
+
                 @switch (Workflow.SourceFileSystemType)
                 {
                     case SupportedFileSystems.FluentFTP:
