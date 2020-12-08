@@ -12,15 +12,15 @@ using CloudFtpBridge.Core.Services;
 
 namespace CloudFtpBridge.Infrastructure.LiteDB
 {
-    public class LiteDBAuditLog : IAuditLog
+    public class LiteDBAuditLog : IAuditLog, IDisposable
     {
+        private readonly ILiteDatabase _db;
         private readonly ILiteCollection<AuditLogEntry> _auditLogEntryCollection;
 
         public LiteDBAuditLog(IOptionsMonitor<LiteDBOptions> liteDBOptions)
         {
-            var db = new LiteDatabase(liteDBOptions.CurrentValue.AuditLogDbConnectionString);
-
-            _auditLogEntryCollection = db.GetCollection<AuditLogEntry>();
+            _db = new LiteDatabase(liteDBOptions.CurrentValue.AuditLogDbConnectionString);
+            _auditLogEntryCollection = _db.GetCollection<AuditLogEntry>();
         }
 
         public Task AddEntry(Workflow workflow, FileRef file, FileStage stage, string message = null)
@@ -42,6 +42,11 @@ namespace CloudFtpBridge.Infrastructure.LiteDB
             _auditLogEntryCollection.DeleteMany(e => e.DateCreated < deleteBeforeDate);
 
             return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            _db.Checkpoint();
         }
 
         public Task<IReadOnlyCollection<AuditLogEntry>> GetEntries(int pageNumber, int pageSize = 100, Expression<Func<AuditLogEntry, bool>> filter = null)

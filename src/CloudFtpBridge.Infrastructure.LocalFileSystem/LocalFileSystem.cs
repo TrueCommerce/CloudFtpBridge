@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,6 +47,21 @@ namespace CloudFtpBridge.Infrastructure.LocalFileSystem
         public Task<Stream> Read(string fileName)
         {
             return Task.FromResult(File.OpenRead(PathHelper.Combine(_options.Path, fileName)) as Stream);
+        }
+
+        public Task Rename(string oldFileName, string newFileName, bool overwriteExisting)
+        {
+            var oldFullFileName = PathHelper.Combine(_options.Path, oldFileName);
+            var newFullFileName = PathHelper.Combine(_options.Path, newFileName);
+
+            if (!overwriteExisting && File.Exists(newFullFileName))
+            {
+                throw new InvalidOperationException($"Unable to rename {oldFileName}. The file {newFileName} already exists.");
+            }
+
+            File.Move(oldFullFileName, newFullFileName);
+
+            return Task.CompletedTask;
         }
 
         public async Task Write(string fileName, Stream fromStream)

@@ -13,6 +13,6 @@ namespace CloudFtpBridge.Core.Models
         public Dictionary<string, string> DestinationFileSystemConfig { get; set; } = new Dictionary<string, string>();
         public string DestinationFileSystemType { get; set; } = string.Empty;
         public bool Enabled { get; set; } = true;
-
+        public bool EnforceUniqueFileNames { get; set; } = false;
     }
 }

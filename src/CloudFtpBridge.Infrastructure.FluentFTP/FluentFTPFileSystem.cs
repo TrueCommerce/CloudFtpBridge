@@ -76,6 +76,21 @@ namespace CloudFtpBridge.Infrastructure.FluentFTP
             return stream;
         }
 
+        public async Task Rename(string oldFileName, string newFileName, bool overwriteExisting)
+        {
+            await _EnsureConnection();
+
+            var oldFullFileName = $"/{PathHelper.Combine(_options.Path, oldFileName)}";
+            var newFullFileName = $"/{PathHelper.Combine(_options.Path, newFileName)}";
+
+            if (!overwriteExisting && await _ftpClient.FileExistsAsync(newFullFileName))
+            {
+                throw new InvalidOperationException($"Unable to rename {oldFileName}. The file {newFileName} already exists.");
+            }
+
+            await _ftpClient.RenameAsync(oldFullFileName, newFullFileName);
+        }
+
         public async Task Write(string fileName, Stream fromStream)
         {
             await _EnsureConnection();
