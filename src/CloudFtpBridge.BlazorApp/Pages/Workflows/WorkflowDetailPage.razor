@@ -58,6 +58,15 @@
                     </div>
                 </div>
 
+                @if (!string.IsNullOrWhiteSpace(Workflow.SourceFileSystemType))
+                {
+                    <div class="row">
+                        <div class="col">
+                            <hr />
+                        </div>
+                    </div>
+                }
+
                 @switch (Workflow.SourceFileSystemType)
                 {
                     case SupportedFileSystems.FluentFTP:
@@ -71,14 +80,28 @@
             </div>
             <div class="col border rounded ml-1 py-1">
 
-                <div class="form-group">
-                    <label class="font-weight-bold">Destination File System</label>
-                    <InputSelect @bind-Value="Workflow.DestinationFileSystemType" class="form-control">
-                        <option value="@SupportedFileSystems.FluentFTP">FTP</option>
-                        <option value="@SupportedFileSystems.Local">Local File System</option>
-                    </InputSelect>
-                    <small class="form-text text-muted">The destination location where files will be transferred TO.</small>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Destination File System</label>
+                            <InputSelect @bind-Value="Workflow.DestinationFileSystemType" class="form-control">
+                                <option value="@SupportedFileSystems.FluentFTP">FTP</option>
+                                <option value="@SupportedFileSystems.Local">Local File System</option>
+                            </InputSelect>
+                            <small class="form-text text-muted">The destination location where files will be transferred TO.</small>
+                        </div>
+                    </div>
                 </div>
+                
+
+                @if (!string.IsNullOrWhiteSpace(Workflow.DestinationFileSystemType))
+                {
+                    <div class="row">
+                        <div class="col">
+                            <hr />
+                        </div>
+                    </div>
+                }
 
                 @switch (Workflow.DestinationFileSystemType)
                 {
