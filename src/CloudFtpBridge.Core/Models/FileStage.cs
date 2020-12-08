@@ -12,54 +12,42 @@ namespace CloudFtpBridge.Core.Models
         TransferStarted = 0,
 
         [Description("Enforce Unique File Name - Started")]
-        EnforceUniqueNameStarted = 51,
+        EnforceUniqueNameStarted = 100,
 
         [Description("Enforce Unique File Name - Failed")]
-        EnforceUniqueNameFailed = 52,
+        EnforceUniqueNameFailed = 200,
 
         [Description("Enforce Unique File Name - Completed")]
-        EnforceUniqueNameCompleted = 53,
-
-        // 54
-        // 55
-        // ...
+        EnforceUniqueNameCompleted = 300,
 
         [Description("Read - Started")]
-        ReadStarted = 1,
-
-        // 101
-        // 102
-        // ...
+        ReadStarted = 400,
 
         [Description("Read - Failed")]
-        ReadFailed = 2,
-
-        // 201
-        // 202
-        // ...
+        ReadFailed = 500,
 
         [Description("Read - Completed")]
-        ReadCompleted = 3,
+        ReadCompleted = 600,
 
         [Description("Write - Started")]
-        WriteStarted = 4,
+        WriteStarted = 700,
 
         [Description("Write - Failed")]
-        WriteFailed = 5,
+        WriteFailed = 800,
 
         [Description("Write - Completed")]
-        WriteCompleted = 6,
+        WriteCompleted = 900,
 
         [Description("Delete Source - Started")]
-        DeleteSourceStarted = 7,
+        DeleteSourceStarted = 1000,
 
         [Description("Delete Source - Failed")]
-        DeleteSourceFailed = 8,
+        DeleteSourceFailed = 1100,
 
         [Description("Delete Source - Completed")]
-        DeleteSourceCompleted = 9,
+        DeleteSourceCompleted = 1200,
 
         [Description("Transfer Completed")]
-        TransferCompleted = 10
+        TransferCompleted = 1300
     }
 }
