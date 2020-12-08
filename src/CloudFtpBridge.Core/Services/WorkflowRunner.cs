@@ -63,6 +63,30 @@ namespace CloudFtpBridge.Core.Services
                 _logger.LogDebug("Processing {FileName}", sourceFile.Name);
 
                 await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferStarted);
+
+                if (workflow.EnforceUniqueFileNames)
+                {
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameStarted);
+
+                    try
+                    {
+                        var newFileName = $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}_{Guid.NewGuid()}{Path.GetExtension(sourceFile.Name)}";
+
+                        await sourceFileSystem.Rename(sourceFile.Name, newFileName, overwriteExisting: false);
+
+                        sourceFile.Name = newFileName;
+
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameCompleted);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameFailed, ex.Message);
+
+                        continue;
+                    }
+                }
+
                 await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadStarted);
 
                 Stream sourceStream = null;

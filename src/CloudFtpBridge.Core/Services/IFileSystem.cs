@@ -31,6 +31,11 @@ namespace CloudFtpBridge.Core.Services
         Task<Stream> Read(string fileName);
 
         /// <summary>
+        /// Changes the name of a file.
+        /// </summary>
+        Task Rename(string oldFileName, string newFileName, bool overwriteExisting);
+
+        /// <summary>
         /// Writes the bytes from the provided stream to the specified file.
         /// If the specified file already exists, it will be overwritten.
         /// </summary>
