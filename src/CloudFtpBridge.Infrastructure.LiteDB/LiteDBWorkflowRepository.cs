@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,15 +11,15 @@ using CloudFtpBridge.Core.Services;
 
 namespace CloudFtpBridge.Infrastructure.LiteDB
 {
-    public class LiteDBWorkflowRepository : IWorkflowRepository
+    public class LiteDBWorkflowRepository : IWorkflowRepository, IDisposable
     {
+        private readonly ILiteDatabase _db;
         private readonly ILiteCollection<Workflow> _workflowCollection;
 
         public LiteDBWorkflowRepository(IOptionsMonitor<LiteDBOptions> liteDBOptions)
         {
-            var db = new LiteDatabase(liteDBOptions.CurrentValue.WorkflowDbConnectionString);
-
-            _workflowCollection = db.GetCollection<Workflow>();
+            _db = new LiteDatabase(liteDBOptions.CurrentValue.WorkflowDbConnectionString);
+            _workflowCollection = _db.GetCollection<Workflow>();
         }
 
         public Task Delete(string id)
@@ -26,6 +27,11 @@ namespace CloudFtpBridge.Infrastructure.LiteDB
             _workflowCollection.Delete(id);
 
             return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            _db.Checkpoint();
         }
 
         public Task<Workflow> Get(string id)
