@@ -17,6 +17,6 @@ namespace CloudFtpBridge.Core
         /// <summary>
         /// Forces a garbage collection in all generations after each workflow run to ensure dereferenced streams are immediately cleaned up.
         /// </summary>
-        public bool ForceGarbageCollection { get; set; } = true;
+        public bool ForceGarbageCollection { get; set; } = false;
     }
 }

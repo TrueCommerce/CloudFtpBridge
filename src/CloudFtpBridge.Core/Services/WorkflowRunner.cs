@@ -173,6 +173,10 @@ namespace CloudFtpBridge.Core.Services
 
             await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
 
+            sourceFiles = null;
+            sourceFileSystem = null;
+            destinationFileSystem = null;
+
             if (_coreOptions.CurrentValue.ForceGarbageCollection)
             {
                 var currentProcess = Process.GetCurrentProcess();
