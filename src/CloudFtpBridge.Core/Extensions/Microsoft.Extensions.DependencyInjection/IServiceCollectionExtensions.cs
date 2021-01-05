@@ -1,14 +1,18 @@
 ﻿using System;
 
+using CloudFtpBridge.Core;
 using CloudFtpBridge.Core.Services;
+
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddCloudFtpBridge(this IServiceCollection services, Action<CloudFtpBridgeAppBuilder> configureApp)
+        public static IServiceCollection AddCloudFtpBridge(this IServiceCollection services, IConfiguration configuration, Action<CloudFtpBridgeAppBuilder> configureApp)
         {
             services
+                .Configure<CoreOptions>(configuration.GetSection("CloudFtpBridge"))
                 .AddSingleton<FileSystemActivator>()
                 .AddSingleton<WorkflowRunner>();
 

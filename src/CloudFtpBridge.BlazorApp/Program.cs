@@ -48,7 +48,7 @@ namespace CloudFtpBridge.BlazorApp
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    services.AddCloudFtpBridge(app =>
+                    services.AddCloudFtpBridge(context.Configuration, app =>
                     {
                         app.UseJsonMailSettingsProvider();
                         app.UseLiteDBLegacyStorage();
