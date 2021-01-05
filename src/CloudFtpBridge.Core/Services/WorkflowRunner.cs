@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -112,6 +113,7 @@ namespace CloudFtpBridge.Core.Services
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadFailed, ex.Message);
 
                     sourceStream?.Dispose();
+                    sourceStream = null;
 
                     await _mailSender.Send("Cloud FTP Bridge: File Read Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
 
@@ -136,6 +138,7 @@ namespace CloudFtpBridge.Core.Services
                     await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
 
                     sourceStream?.Dispose();
+                    sourceStream = null;
 
                     await _mailSender.Send("Cloud FTP Bridge: File Write Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
 
@@ -144,6 +147,7 @@ namespace CloudFtpBridge.Core.Services
 
                 // we do this explicitly to ensure we aren't holding a handle when trying to delete the source if the underlying stream is directly tied to the source file
                 sourceStream?.Dispose();
+                sourceStream = null;
 
                 await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceStarted);
 
@@ -168,6 +172,25 @@ namespace CloudFtpBridge.Core.Services
             }
 
             await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
+
+            sourceFiles = null;
+            sourceFileSystem = null;
+            destinationFileSystem = null;
+
+            if (_coreOptions.CurrentValue.ForceGarbageCollection)
+            {
+                var currentProcess = Process.GetCurrentProcess();
+                var currentMemory = currentProcess.PrivateMemorySize64;
+
+                _logger.LogDebug("Starting garbage collection to ensure dereferenced streams are cleaned up. [Private Memory: {PrivateMemorySize}]", currentMemory);
+
+                GC.Collect();
+
+                currentProcess = Process.GetCurrentProcess();
+                currentMemory = currentProcess.PrivateMemorySize64;
+
+                _logger.LogDebug("Garbage collection completed. [Private Memory: {PRivate Memory Size}]", currentMemory);
+            }
 
             return !hasErrors && await sourceFileSystem.HasFiles();
         }
