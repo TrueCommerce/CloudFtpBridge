@@ -13,5 +13,10 @@ namespace CloudFtpBridge.Core
         /// The amount of time the worker service will wait before running workflows again if no files were present in the latest listing.
         /// </summary>
         public TimeSpan WorkerDelay { get; set; } = TimeSpan.FromMinutes(2);
+
+        /// <summary>
+        /// Forces a garbage collection in all generations after each workflow run to ensure dereferenced streams are immediately cleaned up.
+        /// </summary>
+        public bool ForceGarbageCollection { get; set; } = true;
     }
 }
