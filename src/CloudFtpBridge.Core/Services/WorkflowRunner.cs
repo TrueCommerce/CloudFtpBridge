@@ -173,6 +173,8 @@ namespace CloudFtpBridge.Core.Services
 
             await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
 
+            var hasFiles = await sourceFileSystem.HasFiles();
+
             sourceFiles = null;
             sourceFileSystem = null;
             destinationFileSystem = null;
@@ -189,10 +191,10 @@ namespace CloudFtpBridge.Core.Services
                 currentProcess = Process.GetCurrentProcess();
                 currentMemory = currentProcess.PrivateMemorySize64;
 
-                _logger.LogDebug("Garbage collection completed. [Private Memory: {PRivate Memory Size}]", currentMemory);
+                _logger.LogDebug("Garbage collection completed. [Private Memory: {Private Memory Size}]", currentMemory);
             }
 
-            return !hasErrors && await sourceFileSystem.HasFiles();
+            return !hasErrors && hasFiles;
         }
     }
 }
