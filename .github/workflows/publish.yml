@@ -53,6 +53,12 @@ jobs:
       - uses: actions/setup-dotnet@v1.8.2
         with:
           dotnet-version: 5.0.x
+
+      - uses: cschleiden/replace-tokens@v1.1
+        with:
+          files: ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/Shared/MainLayout.razor
+        env:
+          VERSION: ${{needs.version.outputs.semver}}
       
       - uses: cschleiden/replace-tokens@v1.1
         with:
