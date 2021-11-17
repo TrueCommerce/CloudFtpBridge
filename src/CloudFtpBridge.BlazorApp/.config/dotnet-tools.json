@@ -2,10 +2,10 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "dotnet-ef": {
-      "version": "5.0.0",
+    "microsoft.web.librarymanager.cli": {
+      "version": "2.1.113",
       "commands": [
-        "dotnet-ef"
+        "libman"
       ]
     }
   }

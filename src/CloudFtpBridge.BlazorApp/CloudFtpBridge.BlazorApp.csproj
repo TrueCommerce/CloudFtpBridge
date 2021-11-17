@@ -5,6 +5,14 @@
     <UserSecretsId>ce078f05-e2f2-4edc-b5dd-2e15cb54e302</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
+  
+  <Target Name="RestoreDotNetTools" AfterTargets="AfterBuild">
+    <Exec Command="dotnet tool restore" StandardOutputImportance="high" />
+  </Target>
+
+  <Target Name="RestoreClientDependencies" AfterTargets="AfterBuild" DependsOnTargets="RestoreDotNetTools">
+    <Exec Command="dotnet tool run libman restore" StandardOutputImportance="high" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
