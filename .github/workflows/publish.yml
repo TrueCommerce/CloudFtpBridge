@@ -49,27 +49,27 @@ jobs:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
-      
+
       - uses: actions/setup-dotnet@v1.8.2
         with:
           dotnet-version: 5.0.x
-      
+
       - uses: cschleiden/replace-tokens@v1.1
         with:
           files: ${{github.workspace}}/installer/*.iss
         env:
           VERSION: ${{needs.version.outputs.semver}}
-      
+
       - run: dotnet publish ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/CloudFtpBridge.BlazorApp.csproj -c Release
       - run: '"C:/Program Files (x86)/Inno Setup 6/iscc.exe" /Qp ${{github.workspace}}/installer/CloudFtpBridge.iss'
-  
+
       - uses: actions/upload-artifact@v2
         with:
           name: installer
           path: ${{github.workspace}}/installer/bin
-      
+
       - uses: fnkr/github-action-ghr@v1
-        if: startsWith(github.ref, "refs/tags/")
+        if: context.eventName != "pull_request"
         env:
             GHR_PATH: ${{github.workspace}}/installer/bin/
             GITHUB_TOKEN: ${{github.token}}
