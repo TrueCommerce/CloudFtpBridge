@@ -1,0 +1,76 @@
+name: Publish
+
+on:
+  pull_request:
+  release:
+    types: [released, prereleased]
+    
+jobs:
+  version:
+    name: Determine Version
+    runs-on: ubuntu-18.04
+    outputs:
+      semver: ${{steps.version.outputs.semver}}
+    steps:
+      - uses: actions/checkout@v2
+      
+      - id: version
+        uses: actions/github-script@v5.0.0
+        with:
+          script: |
+            let version = "";
+            const semverPattern = /(\d+\.\d+\.\d+-?([\w\d\.]*))\+?(\d*)/;
+            
+            if (context.eventName == "pull_request" && context.payload.pull_request.milestone && context.payload.pull_request.milestone.title) {
+              version = context.payload.pull_request.milestone.title.match(semverPattern)[1];
+            }
+            
+            else if (context.eventName == "pull_request" && context.payload.pull_request.title) {
+              version = context.payload.pull_request.title.match(semverPattern)[1];
+            }
+            
+            else {
+              version = context.ref.substr(context.ref.lastIndexOf("/") + 1);
+              version = semverPattern.test(version) ? version : null;
+            }
+            
+            if (version) {
+              core.notice(`This run will use ${version} as the version number.`);
+              core.setOutput("semver", version);
+            }
+            else {
+              core.warning("A valid SemVer version number could not be determined for this run.");
+            }
+            
+publish-windows:
+  needs: version
+  if: needs.version.outputs.semver != 0
+  name: Publish Windows Installer
+  runs-on: windows-2019
+  steps:
+    - uses: actions/checkout@v2
+    
+    - uses: actions/setup-dotnet@v1.8.2
+      with:
+        dotnet-version: 5.0.x
+    
+    - uses: cschleiden/replace-tokens@v1.1
+      with:
+        files: ${{github.workspace}}/installer/*.iss
+      env:
+        VERSION: ${{needs.version.outputs.semver}}
+    
+    - run: dotnet publish ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/CloudFtpBridge.BlazorApp.csproj -c Release
+    - run: '"C:/Program Files (x86)/Inno Setup 6/iscc.exe" /Qp ${{github.workspace}}/installer/CloudFtpBridge.iss'
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: installer
+        path: ${{github.workspace}}/installer/bin
+    
+    - uses: fnkr/github-action-ghr@v1
+      if: startsWith(github.ref, "refs/tags/")
+      env:
+          GHR_PATH: ${{github.workspace}}/installer/bin/
+          GITHUB_TOKEN: ${{github.token}}
+  
