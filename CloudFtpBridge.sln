@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudFtpBridge.Infrastructu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CloudFtpBridge.Infrastructure.Json", "src\CloudFtpBridge.Infrastructure.Json\CloudFtpBridge.Infrastructure.Json.csproj", "{A6D99988-DB0B-4DCC-9A81-08A802526FFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFtpBridge.Infrastructure.FTP", "CloudFtpBridge.Infrastructure.FTP\CloudFtpBridge.Infrastructure.FTP.csproj", "{0E9CF9DA-7F24-4CEE-9AA7-49AD78ACB75F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFtpBridge.Infrastructure.FTP", "src\CloudFtpBridge.Infrastructure.FTP\CloudFtpBridge.Infrastructure.FTP.csproj", "{0E9CF9DA-7F24-4CEE-9AA7-49AD78ACB75F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

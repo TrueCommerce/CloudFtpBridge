@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CloudFtpBridge.Infrastructure.FTP\CloudFtpBridge.Infrastructure.FTP.csproj" />
+    <ProjectReference Include="..\CloudFtpBridge.Infrastructure.FTP\CloudFtpBridge.Infrastructure.FTP.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Core\CloudFtpBridge.Core.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Infrastructure.FluentFTP\CloudFtpBridge.Infrastructure.FluentFTP.csproj" />
     <ProjectReference Include="..\CloudFtpBridge.Infrastructure.Json\CloudFtpBridge.Infrastructure.Json.csproj" />
