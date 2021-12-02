@@ -50,6 +50,15 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col">
+        <div class="custom-control custom-checkbox">
+            <input @onchange="@(e => UseFtps = !UseFtps)" checked="@(UseFtps)" class="custom-control-input" id="@($"UseFtps_{ComponentId}")" type="checkbox" />
+            <label class="custom-control-label" for="@($"UseFtps_{ComponentId}")">Use Ftps</label>
+        </div>
+    </div>
+</div>
+
 @if (!AutoConnect)
 {
     <div class="row mt-2">
@@ -84,6 +93,18 @@
         }
 
         set => Set("AutoConnect", value);
+    }
+
+    protected bool UseFtps
+    {
+        get
+        {
+            var value = Get("UseFtps");
+
+            return string.IsNullOrWhiteSpace(value) ? false : bool.Parse(value);
+        }
+
+        set => Set("UseFtps", value);
     }
 
     protected string DataConnectionType

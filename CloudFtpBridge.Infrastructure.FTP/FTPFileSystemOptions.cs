@@ -24,6 +24,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
         public int Port { get; set; } = 21;
         public string Username { get; set; } = string.Empty;
         public string LocalPath { get; set; }
+        public bool UseFtps { get; set; } = false;
 
         public Dictionary<string, string> ToDictionary(Dictionary<string, string> dictionary = null)
         {

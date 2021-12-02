@@ -20,16 +20,23 @@ namespace CloudFtpBridge.Infrastructure.FTP
             {
                 try
                 {
-                    string[] filesOnFtp = GetFileListing();
+                    var filesOnFtp = GetFileListing();
                     foreach (string fileName in files)
                     {
-                        string temp = Path.GetFileName(fileName);
-                        SendToFtp(localDestDir, temp, filesOnFtp);
+                        try
+                        {
+                            string temp = Path.GetFileName(fileName);
+                            SendToFtp(localDestDir, temp, filesOnFtp);
 
-                        if (!Directory.Exists(localDestDir + "Archive"))
-                            Directory.CreateDirectory(localDestDir + "Archive");
+                            if (!Directory.Exists(localDestDir + "Archive"))
+                                Directory.CreateDirectory(localDestDir + "Archive");
 
-                        File.Move(fileName, localDestDir + "Archive\\" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + "_" + temp);
+                            File.Move(fileName, localDestDir + "Archive\\" + DateTime.Now.ToString("yyyyMMddHHmmssffff") + "_" + temp);
+                        }
+                        catch (Exception)
+                        {
+
+                        }
                     }
                 }
                 catch (Exception e)
@@ -39,10 +46,10 @@ namespace CloudFtpBridge.Infrastructure.FTP
             }
         }
 
-        public void SendToFtp(string localFilePath, string fileName, string[] filesOnFtp)
+        public void SendToFtp(string localFilePath, string fileName, List<string> filesOnFtp)
         {
             bool fileExist = false;
-            FtpWebRequest ftpReq = (FtpWebRequest)WebRequest.Create("ftp://" + ftpUrl + "/" + dir + "/" + fileName);
+            FtpWebRequest ftpReq = (FtpWebRequest)WebRequest.Create("ftp://" + ftpUrl + ":" + Port.ToString() + "/" + dir + "/" + fileName);
 
             //Check if file exists on FTP if so set fileExist to true
             if (filesOnFtp != null)
@@ -62,7 +69,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
             else
                ftpReq.Method = WebRequestMethods.Ftp.UploadFile;
 
-
+            ftpReq.EnableSsl = UseFtps;
             ftpReq.UsePassive = Passive;
             ftpReq.UseBinary = true;
             ftpReq.KeepAlive = false;
@@ -85,39 +92,40 @@ namespace CloudFtpBridge.Infrastructure.FTP
             Trace.TraceInformation("Upload was successful: " + fileName);
         }
 
-        public string[] GetFileListing()
+        public List<string> GetFileListing()
         {
-            StringBuilder result = new StringBuilder();
+            string uri = "ftp://" + ftpUrl + ":" + Port.ToString() + "/" + dir + "/";
+            List<string> files = new List<string>();
             WebResponse response = null;
             StreamReader reader = null;
             try
             {
                 FtpWebRequest reqFTP;
-                reqFTP = (FtpWebRequest)WebRequest.Create(new Uri("ftp://" + ftpUrl + "/" + dir + "/"));
-                reqFTP.UseBinary = true;
+                reqFTP = (FtpWebRequest)WebRequest.Create(new Uri(uri));
+                reqFTP.UseBinary = false;
                 reqFTP.Credentials = new NetworkCredential(user, pass);
                 reqFTP.Method = WebRequestMethods.Ftp.ListDirectory;
                 reqFTP.Proxy = null;
                 reqFTP.KeepAlive = true;
                 reqFTP.UsePassive = Passive;
                 reqFTP.Timeout = 600000;
+                reqFTP.EnableSsl = UseFtps;
+
                 response = reqFTP.GetResponse();
                 reader = new StreamReader(response.GetResponseStream());
                 string line = reader.ReadLine();
                 while (line != null)
                 {
-                    result.Append(line);
-                    result.Append("\n");
+                    files.Add(line);
                     line = reader.ReadLine();
                 }
 
-                if (result == null || result.ToString() == "")
+                if (files == null || files.Count == 0)
                 {
                     Trace.TraceInformation("No files to send.");
                     return null;
                 }
-                result.Remove(result.ToString().LastIndexOf('\n'), 1);
-                return result.ToString().Split('\n');
+                return files;
             }
             catch (Exception ex)
             {
@@ -178,6 +186,9 @@ namespace CloudFtpBridge.Infrastructure.FTP
             get { return Passive; }
             set { Passive = value; }
         }
+
+        public bool UseFtps { get; set; } = false;
+        public int Port { get; set; } = 21;
 
         #endregion
     }

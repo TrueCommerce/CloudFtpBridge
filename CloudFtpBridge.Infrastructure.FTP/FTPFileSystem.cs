@@ -37,6 +37,8 @@ namespace CloudFtpBridge.Infrastructure.FTP
             ftpSend.FtpUrl = _options.Host;
             ftpSend.LocalDestDir = localPath;
             ftpSend.Dir = _options.Path;
+            ftpSend.UseFtps = _options.UseFtps;
+            ftpSend.Port = _options.Port;
 
             if (_options.AutoConnect || (!string.IsNullOrEmpty(_options.DataConnectionType) && _options.DataConnectionType.Equals("Passive")))
                 ftpSend.UsePassive = true;
@@ -54,6 +56,8 @@ namespace CloudFtpBridge.Infrastructure.FTP
             ftpRcv.FtpUrl = _options.Host;
             ftpRcv.LocalDestDir = localPath;
             ftpRcv.Dir = _options.Path;
+            ftpRcv.UseFtps = _options.UseFtps;
+            ftpRcv.Port = _options.Port;
 
             if (_options.AutoConnect || (!string.IsNullOrEmpty(_options.DataConnectionType) && _options.DataConnectionType.Equals("Passive")))
                 ftpRcv.SetPassive = true;

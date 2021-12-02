@@ -1,5 +1,6 @@
 ﻿using CloudFtpBridge.Core.Services;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -11,7 +12,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
     {
         public void Download()
         {
-            string[] files = GetFileListing();
+            var files = GetFileListing();
             if (files != null)
             {
                 foreach (string file in files)
@@ -25,7 +26,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
         {
             try
             {
-                string uri = "ftp://" + FtpUrl + "/" + Dir + "/" + file;
+                string uri = "ftp://" + FtpUrl + ":" + Port.ToString() + "/" + Dir + "/" + file;
 
                 Uri ftpServerUri = new Uri(uri);
 
@@ -34,7 +35,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
                     return;
                 }
                 FtpWebRequest reqFTP;
-                reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + ftpUrl + "/" + dir + "/" + file));
+                reqFTP = (FtpWebRequest)FtpWebRequest.Create(ftpServerUri);
 
                 #region Set credentials and settings
                 reqFTP.Credentials = new NetworkCredential(user, pass);
@@ -43,6 +44,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
                 reqFTP.UseBinary = true;
                 reqFTP.Proxy = null;
                 reqFTP.UsePassive = Passive;
+                reqFTP.EnableSsl = UseFtps;
                 #endregion
 
                 FtpWebResponse response = (FtpWebResponse)reqFTP.GetResponse();
@@ -73,13 +75,14 @@ namespace CloudFtpBridge.Infrastructure.FTP
                     try
                     {
                         Trace.TraceInformation("Attempting Delete");
-                        reqFTP = (FtpWebRequest)FtpWebRequest.Create(new Uri("ftp://" + FtpUrl + "/" + Dir + "/" + file));
+                        reqFTP = (FtpWebRequest)WebRequest.Create(ftpServerUri);
                         reqFTP.Credentials = new NetworkCredential(User, Pass);
                         reqFTP.KeepAlive = false;
                         reqFTP.Method = WebRequestMethods.Ftp.DeleteFile;
                         reqFTP.UseBinary = true;
                         reqFTP.Proxy = null;
                         reqFTP.UsePassive = Passive;
+                        reqFTP.EnableSsl = UseFtps;
                         FtpWebResponse responsedel = (FtpWebResponse)reqFTP.GetResponse();
                         responsedel.Close();
                         Trace.TraceInformation("Delete Successful");
@@ -99,14 +102,15 @@ namespace CloudFtpBridge.Infrastructure.FTP
             }
         }
 
-        public string[] GetFileListing()
+        public List<string> GetFileListing()
         {
+            List<string> files = new List<string>(); 
             StringBuilder result = new StringBuilder();
             WebResponse response = null;
             StreamReader reader = null;
             try
             {
-                FtpWebRequest ftpReq = (FtpWebRequest)WebRequest.Create(new Uri("ftp://" + FtpUrl + "/" + dir + "/"));
+                FtpWebRequest ftpReq = (FtpWebRequest)WebRequest.Create(new Uri("ftp://" + FtpUrl +":"+Port.ToString()+ "/" + dir + "/"));
                 #region FTP Settings
                 ftpReq.UseBinary = true;
                 ftpReq.Credentials = new NetworkCredential(User, Pass);
@@ -115,6 +119,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
                 ftpReq.KeepAlive = true;
                 ftpReq.UsePassive = Passive;
                 ftpReq.Timeout = 600000;
+                ftpReq.EnableSsl = UseFtps;
                 #endregion
 
                 response = ftpReq.GetResponse();
@@ -134,34 +139,31 @@ namespace CloudFtpBridge.Infrastructure.FTP
                                 {
                                     if (!string.IsNullOrEmpty(prefix) & line.StartsWith(prefix))
                                     {
-                                        result.Append(line);
-                                        result.Append("\n");
+                                        files.Add(line);
                                         break;
                                     }
                                 }
                             }
                             else if (line.StartsWith(FTPPrefixes))//if only one
                             {
-                                result.Append(line);
-                                result.Append("\n");
+                                files.Add(line);
                             }
                         }
                         else
                         {
-                            result.Append(line);
-                            result.Append("\n");
+                            files.Add(line);
                         }
                     }
                     line = reader.ReadLine();
 
                 }
 
-                if (result == null || result.ToString() == "")
+                if (files == null || files.Count == 0)
                 {
                     return null;
                 }
-                result.Remove(result.ToString().LastIndexOf('\n'), 1);
-                return result.ToString().Split('\n');
+               
+                return files;
             }
             catch (Exception ex)
             {
@@ -244,6 +246,9 @@ namespace CloudFtpBridge.Infrastructure.FTP
             get { return enableArch; }
             set { enableArch = value; }
         }
+
+        public bool UseFtps { get; set; } = false;
+        public int Port { get; set; } = 21;
         #endregion
     }
 }
