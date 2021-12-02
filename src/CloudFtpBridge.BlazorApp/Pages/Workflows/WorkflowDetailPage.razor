@@ -30,7 +30,8 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Source File System</label>
                             <InputSelect @bind-Value="Workflow.SourceFileSystemType" class="form-control">
-                                <option value="@SupportedFileSystems.FluentFTP">FTP</option>
+                                <option value="@SupportedFileSystems.FluentFTP">Fluent FTP</option>
+                                <option value="@SupportedFileSystems.FTP">FTP</option>
                                 <option value="@SupportedFileSystems.Local">Local File System</option>
                             </InputSelect>
                             <small class="form-text text-muted">The source location where files will be transferred FROM.</small>
@@ -72,6 +73,9 @@
                     case SupportedFileSystems.FluentFTP:
                         <FluentFTPOptions Options="Workflow.SourceFileSystemConfig" />
                         break;
+                     case SupportedFileSystems.FTP:
+                        <FTPOptions Options="Workflow.SourceFileSystemConfig" />
+                        break;
                     case SupportedFileSystems.Local:
                         <LocalOptions Options="Workflow.SourceFileSystemConfig" />
                         break;
@@ -85,7 +89,8 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Destination File System</label>
                             <InputSelect @bind-Value="Workflow.DestinationFileSystemType" class="form-control">
-                                <option value="@SupportedFileSystems.FluentFTP">FTP</option>
+                                <option value="@SupportedFileSystems.FluentFTP">Fluent FTP</option>
+                                <option value="@SupportedFileSystems.FTP">FTP</option>
                                 <option value="@SupportedFileSystems.Local">Local File System</option>
                             </InputSelect>
                             <small class="form-text text-muted">The destination location where files will be transferred TO.</small>
@@ -107,6 +112,9 @@
                 {
                     case SupportedFileSystems.FluentFTP:
                         <FluentFTPOptions Options="Workflow.DestinationFileSystemConfig" />
+                        break;
+                    case SupportedFileSystems.FTP:
+                        <FTPOptions Options="Workflow.DestinationFileSystemConfig" />
                         break;
                     case SupportedFileSystems.Local:
                         <LocalOptions Options="Workflow.DestinationFileSystemConfig" />

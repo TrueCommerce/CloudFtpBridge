@@ -15,6 +15,7 @@ namespace CloudFtpBridge.Core.Services
     public class WorkflowRunner
     {
         private readonly FileSystemActivator _fileSystemActivator;
+        private readonly FTPSystemActivator _ftpSystemActivator;
         private readonly IAuditLog _auditLog;
         private readonly IOptionsMonitor<CoreOptions> _coreOptions;
         private readonly IMailSender _mailSender;
@@ -22,12 +23,14 @@ namespace CloudFtpBridge.Core.Services
 
         public WorkflowRunner(
             FileSystemActivator fileSystemActivator,
+            FTPSystemActivator fTPSystemActivator,
             IAuditLog auditLog,
             IOptionsMonitor<CoreOptions> coreOptions,
             IMailSender mailSender,
             ILogger<WorkflowRunner> logger)
         {
             _fileSystemActivator = fileSystemActivator;
+            _ftpSystemActivator = fTPSystemActivator;
             _auditLog = auditLog;
             _coreOptions = coreOptions;
             _mailSender = mailSender;
@@ -42,159 +45,182 @@ namespace CloudFtpBridge.Core.Services
         /// </summary>
         public async Task<bool> Run(Workflow workflow)
         {
-            var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
-            var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
-
-            var sourceFiles = await sourceFileSystem.List();
-
-            var hasErrors = false;
-
-            _logger.LogDebug("Found {SourceFileCount} files.", sourceFiles.Count);
-
-            if (!string.IsNullOrWhiteSpace(workflow.SourceFileFilter))
+            if (workflow.SourceFileSystemType.Equals("CloudFtpBridge.Infrastructure.FTP"))//Receive from FTP
             {
-                _logger.LogDebug("Filtering files with: {SourceFileFilter}", workflow.SourceFileFilter);
+                string localPath = string.Empty;
+                var ftpSource = _ftpSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
+                var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
 
-                var regex = new Regex(workflow.SourceFileFilter);
-
-                sourceFiles = sourceFiles.Where(fr => regex.IsMatch(fr.Name)).ToArray();
-
-                _logger.LogDebug("Found {SourceFileCount} files after filtering.", sourceFiles.Count);
+                if (workflow.DestinationFileSystemConfig.TryGetValue("CloudFtpBridge:Infrastructure:LocalFileSystem:Path", out localPath))
+                    await ftpSource.Receive(localPath);
+                return false;
             }
-
-            foreach (var sourceFile in sourceFiles)
+            else if (workflow.DestinationFileSystemType.Equals("CloudFtpBridge.Infrastructure.FTP"))//Send to FTP
             {
-                _logger.LogDebug("Processing {FileName}", sourceFile.Name);
+                string localPath = string.Empty;
+                var ftpDestination = _ftpSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
+                var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferStarted);
+                if (workflow.SourceFileSystemConfig.TryGetValue("CloudFtpBridge:Infrastructure:LocalFileSystem:Path", out localPath))
+                    await ftpDestination.Send(localPath);
 
-                if (workflow.EnforceUniqueFileNames)
+                return false;
+            }
+            else
+            {
+                var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
+                var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
+
+                var sourceFiles = await sourceFileSystem.List();
+
+                var hasErrors = false;
+                _logger.LogDebug("Found {SourceFileCount} files.", sourceFiles.Count);
+
+                if (!string.IsNullOrWhiteSpace(workflow.SourceFileFilter))
                 {
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameStarted);
+                    _logger.LogDebug("Filtering files with: {SourceFileFilter}", workflow.SourceFileFilter);
+
+                    var regex = new Regex(workflow.SourceFileFilter);
+
+                    sourceFiles = sourceFiles.Where(fr => regex.IsMatch(fr.Name)).ToArray();
+
+                    _logger.LogDebug("Found {SourceFileCount} files after filtering.", sourceFiles.Count);
+                }
+
+                foreach (var sourceFile in sourceFiles)
+                {
+                    _logger.LogDebug("Processing {FileName}", sourceFile.Name);
+
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferStarted);
+
+                    if (workflow.EnforceUniqueFileNames)
+                    {
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameStarted);
+
+                        try
+                        {
+                            var newFileName = $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}_{Guid.NewGuid()}{Path.GetExtension(sourceFile.Name)}";
+
+                            await sourceFileSystem.Rename(sourceFile.Name, newFileName, overwriteExisting: false);
+
+                            sourceFile.Name = newFileName;
+
+                            await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameCompleted);
+                        }
+
+                        catch (Exception ex)
+                        {
+                            hasErrors = true;
+
+                            await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameFailed, ex.Message);
+
+                            continue;
+                        }
+                    }
+
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadStarted);
+
+                    Stream sourceStream = null;
 
                     try
                     {
-                        var newFileName = $"{Path.GetFileNameWithoutExtension(sourceFile.Name)}_{Guid.NewGuid()}{Path.GetExtension(sourceFile.Name)}";
+                        sourceStream = await sourceFileSystem.Read(sourceFile.Name);
 
-                        await sourceFileSystem.Rename(sourceFile.Name, newFileName, overwriteExisting: false);
-
-                        sourceFile.Name = newFileName;
-
-                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameCompleted);
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadCompleted);
                     }
 
                     catch (Exception ex)
                     {
                         hasErrors = true;
 
-                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.EnforceUniqueNameFailed, ex.Message);
+                        _logger.LogError(ex, "Failed to read {FileName}", sourceFile.Name);
+
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadFailed, ex.Message);
+
+                        sourceStream?.Dispose();
+                        sourceStream = null;
+
+                        await _mailSender.Send("Cloud FTP Bridge: File Read Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
 
                         continue;
                     }
-                }
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadStarted);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteStarted);
 
-                Stream sourceStream = null;
+                    try
+                    {
+                        await destinationFileSystem.Write(sourceFile.Name, sourceStream);
 
-                try
-                {
-                    sourceStream = await sourceFileSystem.Read(sourceFile.Name);
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteCompleted);
+                    }
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadCompleted);
-                }
+                    catch (Exception ex)
+                    {
+                        hasErrors = true;
 
-                catch (Exception ex)
-                {
-                    hasErrors = true;
+                        _logger.LogError(ex, "Failed to write {FileName}", sourceFile.Name);
 
-                    _logger.LogError(ex, "Failed to read {FileName}", sourceFile.Name);
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadFailed, ex.Message);
+                        sourceStream?.Dispose();
+                        sourceStream = null;
 
+                        await _mailSender.Send("Cloud FTP Bridge: File Write Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
+
+                        continue;
+                    }
+
+                    // we do this explicitly to ensure we aren't holding a handle when trying to delete the source if the underlying stream is directly tied to the source file
                     sourceStream?.Dispose();
                     sourceStream = null;
 
-                    await _mailSender.Send("Cloud FTP Bridge: File Read Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceStarted);
 
-                    continue;
+                    try
+                    {
+                        await sourceFileSystem.Delete(sourceFile.Name);
+
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceCompleted);
+                    }
+
+                    catch (Exception ex)
+                    {
+                        hasErrors = true;
+
+                        _logger.LogError(ex, "Failed to delete {FileName} at source. This may cause duplicates if the file is processed again on the next run.", sourceFile.Name);
+
+                        await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message);
+                        await _mailSender.Send("Cloud FTP Bridge: File Delete Failure", $"<p style=\"color:red;\"><strong>WARNING:</strong>&nbsp;This error may result in the referenced file being processed more than once. Please audit your transactions as soon as possible.</p><h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
+                    }
+
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferCompleted);
                 }
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteStarted);
+                await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
 
-                try
+                var hasFiles = await sourceFileSystem.HasFiles();
+
+                sourceFiles = null;
+                sourceFileSystem = null;
+                destinationFileSystem = null;
+
+                if (_coreOptions.CurrentValue.ForceGarbageCollection)
                 {
-                    await destinationFileSystem.Write(sourceFile.Name, sourceStream);
+                    var currentProcess = Process.GetCurrentProcess();
+                    var currentMemory = currentProcess.PrivateMemorySize64;
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteCompleted);
+                    _logger.LogDebug("Starting garbage collection to ensure dereferenced streams are cleaned up. [Private Memory: {PrivateMemorySize}]", currentMemory);
+
+                    GC.Collect();
+
+                    currentProcess = Process.GetCurrentProcess();
+                    currentMemory = currentProcess.PrivateMemorySize64;
+
+                    _logger.LogDebug("Garbage collection completed. [Private Memory: {Private Memory Size}]", currentMemory);
                 }
 
-                catch (Exception ex)
-                {
-                    hasErrors = true;
-
-                    _logger.LogError(ex, "Failed to write {FileName}", sourceFile.Name);
-
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
-
-                    sourceStream?.Dispose();
-                    sourceStream = null;
-
-                    await _mailSender.Send("Cloud FTP Bridge: File Write Failure", $"<h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
-
-                    continue;
-                }
-
-                // we do this explicitly to ensure we aren't holding a handle when trying to delete the source if the underlying stream is directly tied to the source file
-                sourceStream?.Dispose();
-                sourceStream = null;
-
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceStarted);
-
-                try
-                {
-                    await sourceFileSystem.Delete(sourceFile.Name);
-
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceCompleted);
-                }
-
-                catch (Exception ex)
-                {
-                    hasErrors = true;
-
-                    _logger.LogError(ex, "Failed to delete {FileName} at source. This may cause duplicates if the file is processed again on the next run.", sourceFile.Name);
-
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message);
-                    await _mailSender.Send("Cloud FTP Bridge: File Delete Failure", $"<p style=\"color:red;\"><strong>WARNING:</strong>&nbsp;This error may result in the referenced file being processed more than once. Please audit your transactions as soon as possible.</p><h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
-                }
-
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferCompleted);
+                return !hasErrors && hasFiles;
             }
-
-            await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
-
-            var hasFiles = await sourceFileSystem.HasFiles();
-
-            sourceFiles = null;
-            sourceFileSystem = null;
-            destinationFileSystem = null;
-
-            if (_coreOptions.CurrentValue.ForceGarbageCollection)
-            {
-                var currentProcess = Process.GetCurrentProcess();
-                var currentMemory = currentProcess.PrivateMemorySize64;
-
-                _logger.LogDebug("Starting garbage collection to ensure dereferenced streams are cleaned up. [Private Memory: {PrivateMemorySize}]", currentMemory);
-
-                GC.Collect();
-
-                currentProcess = Process.GetCurrentProcess();
-                currentMemory = currentProcess.PrivateMemorySize64;
-
-                _logger.LogDebug("Garbage collection completed. [Private Memory: {Private Memory Size}]", currentMemory);
-            }
-
-            return !hasErrors && hasFiles;
         }
     }
 }

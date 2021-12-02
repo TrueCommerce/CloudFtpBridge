@@ -1,0 +1,122 @@
+﻿@using CloudFtpBridge.Infrastructure.FTP
+
+<div class="row">
+    <div class="col-10">
+        <div class="form-group">
+            <label>Host</label>
+            <input @onchange="@(e => Set("Host", e.Value))" class="form-control" type="text" value="@(Get("Host"))" />
+        </div>
+    </div>
+    <div class="col-2">
+        <div class="form-group">
+            <label>Port</label>
+            <input @onchange="@(e => Set("Port", e.Value))" class="form-control" type="number" value="@(Get("Port"))" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Path</label>
+            <input @onchange="@(e => Set("Path", e.Value))" class="form-control" type="text" value="@(Get("Path"))" />
+            <small class="form-text text-muted">The full path to the directory. Usually starts with a forward slash (/).</small>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="form-group">
+            <label>Username</label>
+            <input @onchange="@(e => Set("Username", e.Value))" class="form-control" type="text" value="@(Get("Username"))" />
+        </div>
+    </div>
+    <div class="col">
+        <div class="form-group">
+            <label>Password</label>
+            <input @onchange="@(e => Set("Password", e.Value))" class="form-control" type="password" value="@(Get("Password"))" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="custom-control custom-checkbox">
+            <input @onchange="@(e => AutoConnect = !AutoConnect)" checked="@(AutoConnect)" class="custom-control-input" id="@($"AutoConnect_{ComponentId}")" type="checkbox" />
+            <label class="custom-control-label" for="@($"AutoConnect_{ComponentId}")">Auto-Connect</label>
+            <small class="form-text text-muted">When enabled, FTP will utilize passive connectivity.</small>
+        </div>
+    </div>
+</div>
+
+@if (!AutoConnect)
+{
+    <div class="row mt-2">
+        <div class="col">
+            <div class="form-group">
+                <label>Data Connection Type</label>
+                <InputSelect class="form-control" @bind-Value="DataConnectionType">
+                    <option value="Passive">Passive</option>
+                    <option value="Active">Active</option>
+                </InputSelect>
+            </div>
+        </div>
+    </div>
+}
+
+@code
+{
+    public const string ConfigPrefix = "CloudFtpBridge:Infrastructure:FTP:";
+
+    [Parameter]
+    public Dictionary<string, string> Options { get; set; } = new Dictionary<string, string>();
+
+    protected string ComponentId { get; } = Guid.NewGuid().ToString();
+
+    protected bool AutoConnect
+    {
+        get
+        {
+            var value = Get("AutoConnect");
+
+            return string.IsNullOrWhiteSpace(value) ? false : bool.Parse(value);
+        }
+
+        set => Set("AutoConnect", value);
+    }
+
+    protected string DataConnectionType
+    {
+        get => Get("DataConnectionType");
+        set => Set("DataConnectionType", value);
+    }
+
+    protected string Get(string propertyName)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        if (!Options.ContainsKey(key))
+        {
+            return string.Empty;
+        }
+
+        return Options[key];
+    }
+
+    protected void Set(string propertyName, object value)
+    {
+        var key = $"{ConfigPrefix}{propertyName}";
+
+        Options[key] = value?.ToString();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!Options.Any())
+        {
+            // set defaults for new workflows
+            new FTPFileSystemOptions().ToStringDictionary(ConfigPrefix, Options);
+        }
+    }
+}

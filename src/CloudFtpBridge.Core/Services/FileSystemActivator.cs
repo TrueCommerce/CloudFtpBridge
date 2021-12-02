@@ -21,14 +21,16 @@ namespace CloudFtpBridge.Core.Services
 
         public IFileSystem Activate(string fileSystemTypeName, IDictionary<string, string> configuration)
         {
+            Type fileSystemType;
             _logger.LogDebug("Activating File System: {FileSystemType}", fileSystemTypeName);
 
-            var fileSystemType = AppDomain.CurrentDomain
+            fileSystemType = AppDomain.CurrentDomain
                 .GetAssemblies()
                 .Where(a => a.FullName.Contains("CloudFtpBridge"))
                 .SelectMany(a => a.GetTypes())
                 .Where(t => !t.IsInterface && typeof(IFileSystem).IsAssignableFrom(t))
                 .FirstOrDefault(t => t.FullName.Equals(fileSystemTypeName));
+
 
             if (fileSystemType == null)
             {

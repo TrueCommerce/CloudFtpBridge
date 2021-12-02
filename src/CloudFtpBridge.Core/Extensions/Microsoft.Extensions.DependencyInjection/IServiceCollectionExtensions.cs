@@ -14,6 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .Configure<CoreOptions>(configuration.GetSection("CloudFtpBridge"))
                 .AddSingleton<FileSystemActivator>()
+                .AddSingleton<FTPSystemActivator>()
                 .AddSingleton<WorkflowRunner>();
 
             var builder = new CloudFtpBridgeAppBuilder(services);
