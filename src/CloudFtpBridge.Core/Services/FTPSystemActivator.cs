@@ -24,21 +24,6 @@ namespace CloudFtpBridge.Core.Services
             Type fileSystemType;
             _logger.LogDebug("Activating File System: {IFtpSystem}", fileSystemTypeName);
 
-            var temp = AppDomain.CurrentDomain
-                .GetAssemblies();
-            var temp2 = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Where(a => a.FullName.Contains("CloudFtpBridge"));
-            var temp3 = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Where(a => a.FullName.Contains("CloudFtpBridge"))
-                .SelectMany(a => a.GetTypes());
-            var temp4 = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Where(a => a.FullName.Contains("CloudFtpBridge"))
-                .SelectMany(a => a.GetTypes())
-                .Where(t => !t.IsInterface && typeof(IFtpSystem).IsAssignableFrom(t));
-
             fileSystemType = AppDomain.CurrentDomain
                 .GetAssemblies()
                 .Where(a => a.FullName.Contains("CloudFtpBridge"))
@@ -49,7 +34,7 @@ namespace CloudFtpBridge.Core.Services
 
             if (fileSystemType == null)
             {
-                _logger.LogError("No file system implementation could be found matching the name {FileSystemType}.", fileSystemTypeName);
+                _logger.LogError("No file system implementation could be found matching the name {IFtpSystem}.", fileSystemTypeName);
 
                 throw new TypeLoadException($"Failed to activate file system of type '{fileSystemTypeName}'.");
             }
