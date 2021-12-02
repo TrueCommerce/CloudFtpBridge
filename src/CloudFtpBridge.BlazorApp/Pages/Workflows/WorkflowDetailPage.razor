@@ -30,8 +30,8 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Source File System</label>
                             <InputSelect @bind-Value="Workflow.SourceFileSystemType" class="form-control">
-                                <option value="@SupportedFileSystems.FluentFTP">Fluent FTP</option>
-                                <option value="@SupportedFileSystems.FTP">FTP</option>
+                                <option value="@SupportedFileSystems.FluentFTP">FTP (FluentFTP)</option>
+                                <option value="@SupportedFileSystems.FTP">FTP (FtpWebRequest)</option>
                                 <option value="@SupportedFileSystems.Local">Local File System</option>
                             </InputSelect>
                             <small class="form-text text-muted">The source location where files will be transferred FROM.</small>
@@ -89,8 +89,8 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Destination File System</label>
                             <InputSelect @bind-Value="Workflow.DestinationFileSystemType" class="form-control">
-                                <option value="@SupportedFileSystems.FluentFTP">Fluent FTP</option>
-                                <option value="@SupportedFileSystems.FTP">FTP</option>
+                                <option value="@SupportedFileSystems.FluentFTP">FTP (FluentFTP)</option>
+                                <option value="@SupportedFileSystems.FTP">FTP (FtpWebRequest)</option>
                                 <option value="@SupportedFileSystems.Local">Local File System</option>
                             </InputSelect>
                             <small class="form-text text-muted">The destination location where files will be transferred TO.</small>
