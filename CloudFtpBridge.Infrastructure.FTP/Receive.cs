@@ -35,7 +35,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
                     return;
                 }
                 FtpWebRequest reqFTP;
-                reqFTP = (FtpWebRequest)FtpWebRequest.Create(ftpServerUri);
+                reqFTP = (FtpWebRequest)WebRequest.Create(ftpServerUri);
 
                 #region Set credentials and settings
                 reqFTP.Credentials = new NetworkCredential(user, pass);
