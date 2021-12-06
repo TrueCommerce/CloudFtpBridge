@@ -15,7 +15,6 @@ namespace CloudFtpBridge.Core.Services
     public class WorkflowRunner
     {
         private readonly FileSystemActivator _fileSystemActivator;
-        private readonly FTPSystemActivator _ftpSystemActivator;
         private readonly IAuditLog _auditLog;
         private readonly IOptionsMonitor<CoreOptions> _coreOptions;
         private readonly IMailSender _mailSender;
@@ -23,14 +22,12 @@ namespace CloudFtpBridge.Core.Services
 
         public WorkflowRunner(
             FileSystemActivator fileSystemActivator,
-            FTPSystemActivator fTPSystemActivator,
             IAuditLog auditLog,
             IOptionsMonitor<CoreOptions> coreOptions,
             IMailSender mailSender,
             ILogger<WorkflowRunner> logger)
         {
             _fileSystemActivator = fileSystemActivator;
-            _ftpSystemActivator = fTPSystemActivator;
             _auditLog = auditLog;
             _coreOptions = coreOptions;
             _mailSender = mailSender;
@@ -45,30 +42,7 @@ namespace CloudFtpBridge.Core.Services
         /// </summary>
         public async Task<bool> Run(Workflow workflow)
         {
-            if (workflow.SourceFileSystemType.Equals("CloudFtpBridge.Infrastructure.FTP"))//Receive from FTP
-            {
-                string localPath = string.Empty;
-                var ftpSource = _ftpSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
-                var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
-
-                if (workflow.DestinationFileSystemConfig.TryGetValue("CloudFtpBridge:Infrastructure:LocalFileSystem:Path", out localPath))
-                    await ftpSource.Receive(localPath);
-                return false;
-            }
-            else if (workflow.DestinationFileSystemType.Equals("CloudFtpBridge.Infrastructure.FTP"))//Send to FTP
-            {
-                string localPath = string.Empty;
-                var ftpDestination = _ftpSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
-                var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
-
-                if (workflow.SourceFileSystemConfig.TryGetValue("CloudFtpBridge:Infrastructure:LocalFileSystem:Path", out localPath))
-                    await ftpDestination.Send(localPath);
-
-                return false;
-            }
-            else
-            {
-                var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
+            var sourceFileSystem = _fileSystemActivator.Activate(workflow.SourceFileSystemType, workflow.SourceFileSystemConfig);
                 var destinationFileSystem = _fileSystemActivator.Activate(workflow.DestinationFileSystemType, workflow.DestinationFileSystemConfig);
 
                 var sourceFiles = await sourceFileSystem.List();
@@ -223,4 +197,3 @@ namespace CloudFtpBridge.Core.Services
             }
         }
     }
-}
