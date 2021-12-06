@@ -66,7 +66,7 @@ jobs:
         env:
           VERSION: ${{needs.version.outputs.semver}}
       
-      - run: dotnet publish ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/CloudFtpBridge.BlazorApp.csproj -c Release
+      - run: dotnet publish ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/CloudFtpBridge.BlazorApp.csproj -c Release -r win-x64
       - run: '&"C:/Program Files (x86)/Inno Setup 6/iscc.exe" /Qp ${{github.workspace}}/installer/CloudFtpBridge.iss'
   
       - uses: actions/upload-artifact@v2
