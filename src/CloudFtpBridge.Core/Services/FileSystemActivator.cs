@@ -30,6 +30,7 @@ namespace CloudFtpBridge.Core.Services
                 .Where(t => !t.IsInterface && typeof(IFileSystem).IsAssignableFrom(t))
                 .FirstOrDefault(t => t.FullName.Equals(fileSystemTypeName));
 
+
             if (fileSystemType == null)
             {
                 _logger.LogError("No file system implementation could be found matching the name {FileSystemType}.", fileSystemTypeName);

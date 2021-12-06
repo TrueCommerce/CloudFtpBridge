@@ -57,6 +57,7 @@ namespace CloudFtpBridge.BlazorApp
 
                         app.UseFluentFTPFileSystem();
                         app.UseLocalFileSystem();
+                        app.UseFTPFileSystem();
                     });
 
                     services.AddHostedService<Worker>();
