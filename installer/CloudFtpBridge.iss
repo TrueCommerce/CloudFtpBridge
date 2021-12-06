@@ -34,7 +34,7 @@ LicenseFile=..\LICENSE
 Type: filesandordirs; Name: "{pf}\True Commerce\PSG Engineering\Cloud FTP Bridge\*"
 
 [Files]
-Source: "..\src\CloudFtpBridge.BlazorApp\bin\Release\net5.0\publish\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs;
+Source: "..\src\CloudFtpBridge.BlazorApp\bin\Release\net5.0\win-x64\publish\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs;
 
 [Run]
 Filename: "{sys}\sc.exe"; Parameters: "delete TcCloudFtpBridge"; Flags: waituntilterminated; StatusMsg: "Uninstalling existing service...";
