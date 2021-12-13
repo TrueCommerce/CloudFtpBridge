@@ -23,7 +23,7 @@ namespace CloudFtpBridge.Infrastructure.LiteDB
             _auditLogEntryCollection = _db.GetCollection<AuditLogEntry>();
         }
 
-        public Task AddEntry(Workflow workflow, FileRef file, FileStage stage, string message = null)
+        public Task AddEntry(Workflow workflow, FileRef file, FileStage stage, string message = null, string refData = null)
         {
             _auditLogEntryCollection.Insert(new AuditLogEntry
             {
@@ -31,7 +31,8 @@ namespace CloudFtpBridge.Infrastructure.LiteDB
                 WorkflowName = workflow.Name,
                 FileName = file.Name,
                 FileStage = stage,
-                Message = message ?? string.Empty
+                Message = message ?? string.Empty,
+                Reference = refData ?? string.Empty
             });
 
             return Task.CompletedTask;

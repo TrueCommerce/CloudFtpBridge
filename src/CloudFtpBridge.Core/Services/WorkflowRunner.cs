@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using System.Xml;
 using CloudFtpBridge.Core.Models;
 
 using Microsoft.Extensions.Logging;
@@ -96,12 +97,15 @@ namespace CloudFtpBridge.Core.Services
                 await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadStarted);
 
                 Stream sourceStream = null;
+                string refData = string.Empty;
 
                 try
                 {
+                    
                     sourceStream = await sourceFileSystem.Read(sourceFile.Name);
+                    refData = GetReference(sourceFile.Name, sourceStream, workflow.SourceRefXPathRegex);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadCompleted);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.ReadCompleted, null, refData);
                 }
 
                 catch (Exception ex)
@@ -120,13 +124,13 @@ namespace CloudFtpBridge.Core.Services
                     continue;
                 }
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteStarted);
+                await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteStarted,null,refData);
 
                 try
                 {
                     await destinationFileSystem.Write(sourceFile.Name, sourceStream);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteCompleted);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteCompleted, null, refData);
                 }
 
                 catch (Exception ex)
@@ -135,7 +139,7 @@ namespace CloudFtpBridge.Core.Services
 
                     _logger.LogError(ex, "Failed to write {FileName}", sourceFile.Name);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.WriteFailed, ex.Message,refData);
 
                     sourceStream?.Dispose();
                     sourceStream = null;
@@ -149,13 +153,13 @@ namespace CloudFtpBridge.Core.Services
                 sourceStream?.Dispose();
                 sourceStream = null;
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceStarted);
+                await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceStarted, null, refData);
 
                 try
                 {
                     await sourceFileSystem.Delete(sourceFile.Name);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceCompleted);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceCompleted, null, refData);
                 }
 
                 catch (Exception ex)
@@ -164,11 +168,11 @@ namespace CloudFtpBridge.Core.Services
 
                     _logger.LogError(ex, "Failed to delete {FileName} at source. This may cause duplicates if the file is processed again on the next run.", sourceFile.Name);
 
-                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message);
+                    await _auditLog.AddEntry(workflow, sourceFile, FileStage.DeleteSourceFailed, ex.Message, refData);
                     await _mailSender.Send("Cloud FTP Bridge: File Delete Failure", $"<p style=\"color:red;\"><strong>WARNING:</strong>&nbsp;This error may result in the referenced file being processed more than once. Please audit your transactions as soon as possible.</p><h3>Workflow</h3><p>{workflow.Name}</p><h3>File Name</h3><p>{sourceFile.Name}</p><h3>Error Message</h3><p>{ex.Message}</p>");
                 }
 
-                await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferCompleted);
+                await _auditLog.AddEntry(workflow, sourceFile, FileStage.TransferCompleted, null, refData);
             }
 
             await _auditLog.Cleanup(DateTimeOffset.UtcNow.Subtract(_coreOptions.CurrentValue.AuditLogRetentionLimit));
@@ -195,6 +199,42 @@ namespace CloudFtpBridge.Core.Services
             }
 
             return !hasErrors && hasFiles;
+        }
+
+        private string GetReference(string fileName, Stream inData, string regexOrXpath)
+        {
+            string ret = string.Empty;
+            try
+            {
+                if (string.IsNullOrEmpty(fileName) || inData == null || string.IsNullOrEmpty(regexOrXpath))
+                    return string.Empty;
+
+                StreamReader reader = new StreamReader(inData);
+                string data = reader.ReadToEnd();
+                inData.Seek(0, SeekOrigin.Begin);
+
+                string ext = Path.GetExtension(fileName);
+
+                if (ext?.ToUpper() == ".XML")
+                {
+                    if (!string.IsNullOrEmpty(data))
+                    {
+                        XmlDocument doc = new XmlDocument();
+                        doc.LoadXml(data);
+                        ret = doc.SelectSingleNode(regexOrXpath)?.InnerText ?? string.Empty; 
+                    }
+                }
+                else
+                {
+                    if (Regex.Matches(data, regexOrXpath).Count > 0)
+                        ret = Regex.Matches(data,regexOrXpath)[0].Value ?? string.Empty;
+                }
+            }
+            catch (Exception)
+            {
+                
+            }
+            return ret;
         }
     }
 }
