@@ -221,7 +221,20 @@ namespace CloudFtpBridge.Core.Services
                     {
                         XmlDocument doc = new XmlDocument();
                         doc.LoadXml(data);
-                        ret = doc.SelectSingleNode(regexOrXpath)?.InnerText ?? string.Empty; 
+
+                        if (regexOrXpath.Contains("|"))//if multiple xpaths
+                        {
+                            foreach (var xpath in regexOrXpath.Split('|'))
+                            {
+                                ret = doc.SelectSingleNode(xpath)?.InnerText ?? string.Empty;
+                                if (!string.IsNullOrEmpty(ret))
+                                    break;
+                            }
+                        }
+                        else //if single xpath
+                        {
+                            ret = doc.SelectSingleNode(regexOrXpath)?.InnerText ?? string.Empty;
+                        }
                     }
                 }
                 else
