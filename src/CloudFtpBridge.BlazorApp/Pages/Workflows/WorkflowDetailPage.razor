@@ -58,6 +58,16 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>Reference Capture</label>
+                            <input @bind="Workflow.SourceRefXPathRegex" class="form-control" type="text" />
+                            <small class="form-text text-muted">Used to pull a reference from the source document which is shown in the audit log. XML files will utilize XPath. Any other file type will utilize regex.</small>
+                        </div>
+                    </div>
+                </div>
 
                 @if (!string.IsNullOrWhiteSpace(Workflow.SourceFileSystemType))
                 {
@@ -73,7 +83,7 @@
                     case SupportedFileSystems.FluentFTP:
                         <FluentFTPOptions Options="Workflow.SourceFileSystemConfig" />
                         break;
-                     case SupportedFileSystems.FTP:
+                    case SupportedFileSystems.FTP:
                         <FTPOptions Options="Workflow.SourceFileSystemConfig" />
                         break;
                     case SupportedFileSystems.Local:
@@ -135,11 +145,27 @@
                 </div>
             </div>
         </div>
+        <div class="modal" tabindex="-1" style="display:@SavedSuccess" role="dialog">  
+            <div class="modal-dialog">  
+                <div class="modal-content">  
+                    <div class="modal-header">  
+                        <h3 class="modal-title">Save Successful!</h3>  
+                    </div>  
+                    <div class="modal-body">  
+                        The workflow has been updated/ saved successfully.
+                    </div>  
+                    <button @onclick="OnClickCloseWindow" class="btn btn-success mr-2" style="min-width:100px;">Close</button>
+                </div>  
+            </div>  
+        </div>
+   
     </EditForm>
+
 </div>
 
 @code
 {
+    string SavedSuccess = "none";
     public Workflow Workflow { get; set; } = new Workflow();
 
     [Parameter]
@@ -160,6 +186,13 @@
     protected async Task OnClickSave()
     {
         await WorkflowRepository.Save(Workflow);
+        SavedSuccess = "initial";
+    }
+
+    protected Task OnClickCloseWindow()
+    {
+        SavedSuccess = "none";
+        return Task.CompletedTask;
     }
 
     protected override async Task OnParametersSetAsync()

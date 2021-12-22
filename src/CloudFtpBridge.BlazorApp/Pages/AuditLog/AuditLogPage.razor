@@ -34,6 +34,7 @@
                     <tr>
                         <th>Timestamp</th>
                         <th>Workflow</th>
+                        <th>Reference</th>
                         <th>File</th>
                         <th>Stage</th>
                         <th>Message</th>
@@ -45,6 +46,7 @@
                         <tr>
                             <td style="min-width:150px;">@entry.DateCreated.LocalDateTime.ToString("G")</td>
                             <td>@entry.WorkflowName</td>
+                            <td>@entry.Reference</td>
                             <td>@entry.FileName</td>
                             <td style="max-width:100px;">
                                 <span class="@($"badge {GetBadgeColorClass(entry.FileStage)} p-1 px-2")" style="width:200px;">@entry.FileStage.ToDisplayName()</span>
@@ -83,7 +85,7 @@
 
         else
         {
-            AuditLogEntries.AddRange(await AuditLog.GetEntries(PageNumber, filter: e => e.FileName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)));
+            AuditLogEntries.AddRange(await AuditLog.GetEntries(PageNumber, filter: e => e.FileName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase) || e.Reference.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)));
         }
     }
 
