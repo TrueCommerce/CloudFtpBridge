@@ -42,6 +42,13 @@ namespace CloudFtpBridge.Infrastructure.FluentFTP
             await _ftpClient.DeleteFileAsync($"/{PathHelper.Combine(_options.Path, fileName)}");
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            await _ftpClient.DisconnectAsync();
+
+            _ftpClient.Dispose();
+        }
+
         public async Task<bool> HasFiles()
         {
             await _EnsureConnection();
