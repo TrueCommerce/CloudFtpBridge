@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+
 using Microsoft.Extensions.Logging;
 
 namespace CloudFtpBridge.Infrastructure.FTP
@@ -122,7 +124,7 @@ namespace CloudFtpBridge.Infrastructure.FTP
             reqFtp.UseBinary = false;
             reqFtp.Credentials = new NetworkCredential(User, Pass);
             reqFtp.Proxy = null;
-            reqFtp.KeepAlive = true;
+            reqFtp.KeepAlive = false;
             reqFtp.UsePassive = UsePassive;
             reqFtp.Timeout = 600000;
             reqFtp.EnableSsl = UseFtps;
@@ -175,7 +177,15 @@ namespace CloudFtpBridge.Infrastructure.FTP
                 var reqFtp = CreateRequest(file);
                 reqFtp.Method = WebRequestMethods.Ftp.DownloadFile;
                 FtpWebResponse response = (FtpWebResponse)reqFtp.GetResponse();
-                Stream responseStream = response.GetResponseStream();
+
+
+                Stream responseStream = new MemoryStream();
+
+                response.GetResponseStream().CopyTo(responseStream);
+
+                responseStream.Seek(0, SeekOrigin.Begin);
+
+                response.Close();
 
                 Logger.LogInformation("FtpWebRequest: File has been received successfully.");
                 return responseStream;

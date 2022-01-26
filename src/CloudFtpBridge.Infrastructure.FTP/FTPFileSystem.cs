@@ -33,6 +33,11 @@ namespace CloudFtpBridge.Infrastructure.FTP
             await Task.Run(() =>_ftpClient.Delete(fileName));
         }
 
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
+        }
+
         public async Task<bool> HasFiles()
         {
             var names = await Task.Run(()=> _ftpClient.GetListOfFiles());

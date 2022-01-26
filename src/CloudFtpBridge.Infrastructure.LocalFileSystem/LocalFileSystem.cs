@@ -28,6 +28,11 @@ namespace CloudFtpBridge.Infrastructure.LocalFileSystem
             return Task.CompletedTask;
         }
 
+        public ValueTask DisposeAsync()
+        {
+            return ValueTask.CompletedTask;
+        }
+
         public Task<bool> HasFiles()
         {
             var directoryInfo = new DirectoryInfo(PathHelper.Combine(_options.Path));

@@ -179,6 +179,9 @@ namespace CloudFtpBridge.Core.Services
 
             var hasFiles = await sourceFileSystem.HasFiles();
 
+            await sourceFileSystem.DisposeAsync();
+            await destinationFileSystem.DisposeAsync();
+
             sourceFiles = null;
             sourceFileSystem = null;
             destinationFileSystem = null;
