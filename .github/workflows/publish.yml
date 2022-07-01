@@ -10,37 +10,14 @@ jobs:
     name: Determine Version
     runs-on: ubuntu-18.04
     outputs:
-      semver: ${{steps.version.outputs.semver}}
+      semver: ${{ steps.version.outputs.semver }}
+      semverMajor: ${{ steps.version.outputs.semverMajor }}
+      semverMajorMinor: ${{ steps.version.outputs.semverMajorMinor }}
+      semverMajorMinorPatch: ${{ steps.version.outputs.semverMajorMinorPatch }}
+      semverWithBuildMetadata: ${{ steps.version.outputs.semverWithBuildMetadata }}
     steps:
-      - uses: actions/checkout@v2
-      
       - id: version
-        uses: actions/github-script@v5.0.0
-        with:
-          script: |
-            let version = "";
-            const semverPattern = /(\d+\.\d+\.\d+-?([\w\d\.]*))\+?(\d*)/;
-            
-            if (context.eventName == "pull_request" && context.payload.pull_request.milestone && context.payload.pull_request.milestone.title) {
-              version = context.payload.pull_request.milestone.title.match(semverPattern)[1];
-            }
-            
-            else if (context.eventName == "pull_request" && context.payload.pull_request.title) {
-              version = context.payload.pull_request.title.match(semverPattern)[1];
-            }
-            
-            else {
-              version = context.ref.substr(context.ref.lastIndexOf("/") + 1);
-              version = semverPattern.test(version) ? version : null;
-            }
-            
-            if (version) {
-              core.notice(`This run will use ${version} as the version number.`);
-              core.setOutput("semver", version);
-            }
-            else {
-              core.warning("A valid SemVer version number could not be determined for this run.");
-            }
+        uses: truecommerce/ghaction-version@1.2.0
             
   publish-windows:
     needs: version
@@ -64,7 +41,7 @@ jobs:
         with:
           files: ${{github.workspace}}/installer/*.iss
         env:
-          VERSION: ${{needs.version.outputs.semver}}
+          VERSION: ${{needs.version.outputs.semverWithBuildMetadata}}
       
       - run: dotnet publish ${{github.workspace}}/src/CloudFtpBridge.BlazorApp/CloudFtpBridge.BlazorApp.csproj -c Release -r win-x64
       - run: '&"C:/Program Files (x86)/Inno Setup 6/iscc.exe" /Qp ${{github.workspace}}/installer/CloudFtpBridge.iss'
