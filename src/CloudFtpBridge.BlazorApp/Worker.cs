@@ -102,11 +102,11 @@ namespace CloudFtpBridge.BlazorApp
                 {
                     var workerDelay = _coreOptions.CurrentValue.WorkerDelay;
 
-                    if (workerDelay.TotalMinutes < 5)
+                    if (workerDelay.TotalSeconds < 30)
                     {
-                        _logger.LogWarning("WorkerDelay was set to {OriginalWorkerDelay}, which is less than the minimum delay of 5 minutes. The configured value will be ignored.", workerDelay);
+                        _logger.LogWarning("WorkerDelay was set to {OriginalWorkerDelay}, which is less than the minimum delay of 30 seconds. The configured value will be set to the minimum of 30 seconds.", workerDelay);
 
-                        workerDelay = TimeSpan.FromMinutes(5);
+                        workerDelay = TimeSpan.FromSeconds(30);
                     }
 
                     _logger.LogDebug("Waiting {WorkerDelay} until the next run.", _coreOptions.CurrentValue.WorkerDelay);
