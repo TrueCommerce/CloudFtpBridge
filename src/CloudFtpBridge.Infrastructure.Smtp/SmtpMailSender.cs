@@ -25,25 +25,40 @@ namespace CloudFtpBridge.Infrastructure.Smtp
             }
 
             SmtpClient smtpClient = new SmtpClient(settings.Host);
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential(settings.Username, settings.Password);
-            smtpClient.Port = settings.Port;
 
-            MailMessage mailMessage = new MailMessage();
-            mailMessage.Body = message;
-            mailMessage.From = new MailAddress(settings.FromAddress);
-            mailMessage.IsBodyHtml = true;
-            mailMessage.Subject = subject;
-
-            foreach (string toAddress in settings.ToAddresses)
+            try
             {
-                mailMessage.To.Add(toAddress);
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new NetworkCredential(settings.Username, settings.Password);
+                smtpClient.Port = settings.Port;
+
+                MailMessage mailMessage = new MailMessage();
+                mailMessage.Body = message;
+                mailMessage.From = new MailAddress(settings.FromAddress);
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Subject = subject;
+
+                foreach (string toAddress in settings.ToAddresses)
+                {
+                    mailMessage.To.Add(toAddress);
+                }
+
+                await Task.Run(() =>
+                {
+                    smtpClient.Send(mailMessage);
+                });
             }
 
-            await Task.Run(() =>
+            finally
             {
-                smtpClient.Send(mailMessage);
-            });
+                try
+                {
+                    smtpClient.Dispose();
+                }
+
+                catch { }
+            }
+            
         }
     }
 }
